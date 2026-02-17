@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Eddajjany - Packs Fruits Secs</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <!-- Navigation -->
+    <header>
+        <h1 class="logo">Eddajjany Packs</h1>
+        <nav>
+            <ul>
+                <li><a href="#packs">Accueil</a></li>
+                <li><a href="#fruits">Fruits Secs</a></li>
+                <li><a href="#epices">Épices</a></li>
+                <li><a href="#zayton">Zaytoun</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <!-- Section Packs -->
+    <section id="packs" class="section">
+        <h2 class="title">Nos Packs</h2>
+
+        <div class="grid">
+            <div class="card">Pack Fakia</div>
+            <div class="card">Pack Menaa</div>
+            <div class="card">Pack Zaytona</div>
+            <div class="card">Pack Ftour</div>
+            <div class="card">Pack Énergétique</div>
+            <div class="card">Pack Épices</div>
+        </div>
+    </section>
+
+    <!-- Sections catégories -->
+    <section id="fruits" class="section">
+        <h2 class="title">Fruits Secs</h2>
+        <p class="text">Liste des fruits secs disponibles...</p>
+    </section>
+
+    <section id="epices" class="section">
+        <h2 class="title">Épices</h2>
+        <p class="text">Liste des épices disponibles...</p>
+    </section>
+
+    <section id="zayton" class="section">
+        <h2 class="title">Zaytouna</h2>
+        <p class="text">Variétés de zaytoun disponibles...</p>
+    </section>
+
+</body>
+</html>

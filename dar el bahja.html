@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dar El Bahja | Boutique Premium</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  --gold:#d4af37;
+  --black:#000;
+  --dark:#111;
+  --white:#fff;
+  --gray:#f5f5f5;
+}
+
+*{margin:0;padding:0;box-sizing:border-box;}
+
+body{
+  font-family:'Poppins',sans-serif;
+  background:var(--gray);
+  color:#000;
+}
+
+img{width:100%;display:block;}
+
+header{
+  position:sticky;top:0;z-index:1000;
+  background:#000;border-bottom:2px solid var(--gold);
+  padding:15px 30px;
+  display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;
+}
+
+.brand{display:flex;align-items:center;gap:12px;font-size:26px;font-weight:700;color:var(--gold);} 
+.brand img{width:55px;height:55px;border-radius:50%;border:2px solid var(--gold);} 
+
+nav ul{list-style:none;display:flex;gap:25px;}
+nav a{color:var(--gold);text-decoration:none;font-weight:500;}
+nav a:hover{color:white;}
+
+.header-right{display:flex;gap:10px;}
+.header-right a,.panier{
+  background:var(--gold);color:#000;padding:8px 16px;border-radius:30px;font-weight:600;text-decoration:none;transition:.3s;
+}
+.header-right a:hover,.panier:hover{background:white;}
+
+.section{padding:80px 6%;}
+.title{text-align:center;font-size:38px;margin-bottom:40px;}
+
+.slider-container{position:relative;}
+.slider-track{display:flex;gap:25px;overflow-x:auto;scroll-behavior:smooth;padding-bottom:15px;}
+.slider-track::-webkit-scrollbar{display:none;}
+
+.card{
+  min-width:260px;background:white;border-radius:18px;overflow:hidden;
+  box-shadow:0 10px 25px rgba(0,0,0,.15);transition:.4s;
+}
+.card img{height:200px;object-fit:cover;}
+.card .info{padding:15px;text-align:center;}
+.card h4{font-size:18px;margin-bottom:5px;}
+.price{color:var(--gold);font-weight:700;margin-bottom:10px;}
+.btn-order{
+  display:inline-block;padding:8px 20px;border-radius:25px;
+  background:var(--gold);color:#000;text-decoration:none;font-weight:600;
+}
+.btn-order:hover{background:#000;color:var(--gold);border:1px solid var(--gold);} 
+
+.card:hover{transform:translateY(-8px) scale(1.05);} 
+
+.slider-btn{
+  position:absolute;top:45%;width:45px;height:45px;border-radius:50%;border:none;
+  background:var(--gold);font-size:22px;cursor:pointer;opacity:.85;
+}
+.left{left:-10px;} .right{right:-10px;} 
+
+footer{
+  background:#000;color:var(--gold);text-align:center;padding:40px 20px;border-top:2px solid var(--gold);
+}
+footer a{color:var(--gold);margin:0 10px;text-decoration:none;} footer a:hover{color:white;}
+
+@media(max-width:768px){nav ul{flex-direction:column;} .title{font-size:28px;} .card{min-width:220px;}}
+
+/* MODAL PACK DETAILS */
+.modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.6);justify-content:center;align-items:center;z-index:1000}
+.modal-content{background:#fff;padding:20px;border-radius:12px;max-width:500px;width:90%;text-align:center}
+.modal-content h3{margin-bottom:10px;color:#000}
+.modal-items{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin:15px 0}
+.modal-items div{border:1px solid #ddd;padding:8px;border-radius:8px;font-size:14px}
+.modal-items img{width:100%;border-radius:6px}
+.btn-confirm{background:#25D366;color:#fff;padding:10px 20px;border:none;border-radius:25px;font-weight:600;cursor:pointer}
+.btn-close{margin-top:10px;display:block;color:#555;cursor:pointer}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand"><img src="logo.png.jpg">Dar El Bahja</div>
+  <nav>
+    <ul>
+      <li><a href="#packs">Packs</a></li>
+      <li><a href="#fruits">Fruits Secs</a></li>
+      <li><a href="#epices">Épices</a></li>
+      <li><a href="#extras">Produits Naturels</a></li>
+    </ul>
+  </nav>
+  <div class="header-right">
+    <a href="https://wa.me/212680292447">WhatsApp</a>
+    <a href="https://www.instagram.com/dar__elbahja">Instagram</a>
+    <div class="panier">🛒</div>
+  </div>
+</header>
+
+<section id="packs" class="section">
+<h2 class="title">Nos Packs</h2>
+<div class="slider-container">
+  <div class="slider-track">
+    <div class="card">
+      <img src="pack fakia.jpeg">
+      <div class="info">
+        <h4>Pack Fakia</h4>
+        <div class="price">149 DH</div>
+        <a class="btn-order" href="javascript:void(0)" onclick="openPack('fakia')">Commander</a>
+      </div>
+    </div>
+    <div class="card">
+      <img src="manaa.jpeg">
+      <div class="info">
+        <h4>Pack Manaa</h4>
+        <div class="price">140 DH</div>
+        <a class="btn-order" href="https://wa.me/212680292447?text=Commande%20Pack%20Manaa">Commander</a>
+      </div>
+    </div>
+    <div class="card">
+      <img src="pack zaytona.jpeg">
+      <div class="info">
+        <h4>Pack Zaytona</h4>
+        <div class="price">135 DH</div>
+        <a class="btn-order" href="https://wa.me/212680292447?text=Commande%20Pack%20Zaytona">Commander</a>
+      </div>
+    </div>
+    <div class="card">
+      <img src="pack ftor.jpeg">
+      <div class="info">
+        <h4>Pack Ftour</h4>
+        <div class="price">299 DH</div>
+        <a class="btn-order" href="https://wa.me/212680292447?text=Commande%20Pack%20Ftour">Commander</a>
+      </div>
+    </div>
+    <div class="card">
+      <img src="pack bomb.jpeg">
+      <div class="info">
+        <h4>Pack Énergétique</h4>
+        <div class="price">129 DH</div>
+        <a class="btn-order" href="https://wa.me/212680292447?text=Commande%20Energétique">Commander</a>
+      </div>
+    </div>
+  </div>
+</div>
+</section>
+
+<section id="fruits" class="section">
+<h2 class="title">Fruits Secs</h2>
+<div class="slider-track">
+<div class="card"><img src="amande.jpg"><div class="info"><h4>Amandes</h4><div class="price">65 DH</div></div></div>
+<div class="card"><img src="noix.jpg"><div class="info"><h4>Noix</h4><div class="price">70 DH</div></div></div>
+<div class="card"><img src="pistache.jpg"><div class="info"><h4>Pistaches</h4><div class="price">85 DH</div></div></div>
+<div class="card"><img src="acajou.jpg"><div class="info"><h4>Acajou</h4><div class="price">90 DH</div></div></div>
+</div></section>
+
+<section id="epices" class="section">
+<h2 class="title">Épices</h2>
+<div class="slider-track">
+<div class="card"><img src="curry.jpg"><div class="info"><h4>Curry</h4><div class="price">25 DH</div></div></div>
+<div class="card"><img src="paprika.jpg"><div class="info"><h4>Paprika</h4><div class="price">20 DH</div></div></div>
+<div class="card"><img src="safran.jpg"><div class="info"><h4>Safran</h4><div class="price">120 DH</div></div></div>
+<div class="card"><img src="gingembre.jpg"><div class="info"><h4>Gingembre</h4><div class="price">22 DH</div></div></div>
+</div></section>
+
+<section id="extras" class="section">
+<h2 class="title">Produits Naturels</h2>
+<div class="slider-track">
+<div class="card"><img src="huile-argan.jpg"><div class="info"><h4>Huile d'Argan</h4><div class="price">95 DH</div></div></div>
+<div class="card"><img src="miel.jpg"><div class="info"><h4>Miel Naturel</h4><div class="price">80 DH</div></div></div>
+<div class="card"><img src="herbes.jpg"><div class="info"><h4>Herbes Séchées</h4><div class="price">30 DH</div></div></div>
+</div></section>
+
+<footer id="contact">
+  <h3>Contactez-nous</h3>
+  <a href="https://wa.me/212680292447">WhatsApp</a>
+  <a href="https://www.instagram.com/dar__elbahja">Instagram</a>
+  <p>© 2026 Dar El Bahja – Qualité & Tradition</p>
+</footer>
+
+<!-- MODAL -->
+<div class="modal" id="packModal">
+  <div class="modal-content">
+    <h3 id="modalTitle"></h3>
+    <div class="modal-items" id="modalItems"></div>
+    <button class="btn-confirm" id="confirmBtn">Confirmer la commande</button>
+    <span class="btn-close" onclick="closeModal()">Fermer</span>
+  </div>
+</div>
+
+<script>
+const packs={
+  fakia:{
+    title:'Pack Fakia – 149 DH',
+    items:[
+      {n:'بيسطاش', g:'125g', img:''},
+      {n:'كاجو', g:'125g', img:''},
+      {n:'لوز', g:'125g', img:''},
+      {n:'كاوكاو', g:'125g', img:''},
+      {n:'كركاع', g:'125g', img:''},
+      {n:'تمور جنات النخيل رطب سكري', g:'125g', img:''},
+      {n:'زبيب', g:'125g', img:''}
+    ],
+    msg:`دار البهجة كتقدم ليكم باك من أجود الفواكه الجافة😍
+7 أنواع من الفواكه الجافة
+غير✅️ 150dh ✅️
+📌1-بيسطاش[125g]
+📌2-كاجو[125g]
+📌3-لوز[125g]
+📌4-كاوكاو [125g]
+📌5-كركاع [125g]
+📌6-تمور جنات النخيل رطب سكري[125g]
+📌7-زبيب[125g]
+✅️+التوصيل مجاني 🇲🇦🚛`
+  },
+  manaa:{title:'Pack Manaa – 140 DH',items:[{n:'Dattes',g:'500g',img:''},{n:'Figues sèches',g:'250g',img:''}],msg:'Je confirme la commande du Pack Manaa (140 DH)'},
+  zaytona:{title:'Pack Zaytona – 135 DH',items:[{n:'Olives vertes',g:'500g',img:''},{n:'Huile d’olive',g:'250ml',img:''}],msg:'Je confirme la commande du Pack Zaytona (135 DH)'},
+  ftour:{title:'Pack Ftour – 299 DH',items:[{n:'Chebakia',g:'500g',img:''},{n:'Dattes premium',g:'1kg',img:''},{n:'Harira',g:'500g',img:''}],msg:'Je confirme la commande du Pack Ftour (299 DH)'},
+  energie:{title:'Pack Énergétique – 129 DH',items:[{n:'Miel',g:'250g',img:''},{n:'Fruits secs',g:'300g',img:''}],msg:'Je confirme la commande du Pack Énergétique (129 DH)'}
+};
+
+let currentPack='';
+function openPack(key){
+  const p=packs[key];
+  currentPack=p.msg;
+  document.getElementById('modalTitle').innerText=p.title;
+  const box=document.getElementById('modalItems');
+  box.innerHTML='';
+  p.items.forEach(i=>{
+    box.innerHTML+=`<div><img src="${i.img}"><p>${i.n}<br><b>${i.g}</b></p></div>`;
+  });
+  document.getElementById('packModal').style.display='flex';
+}
+
+function closeModal(){document.getElementById('packModal').style.display='none'}
+
+document.getElementById('confirmBtn').onclick=()=>{
+  window.open(`https://wa.me/212680292447?text=${encodeURIComponent(currentPack)}`,'_blank');
+}
+</script>
+
+</body>
+</html>
