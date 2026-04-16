@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -403,4 +404,300 @@ function closeModals() {
 }
 </script>
 </body>
+=======
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dar El Bahja | Boutique Premium</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root{ --gold:#d4af37; --black:#000; --white:#fff; --gray:#f5f5f5; --success:#25D366; }
+        *{margin:0;padding:0;box-sizing:border-box;}
+        html { scroll-behavior: smooth; }
+
+        /* MODIFICATION : AJOUT DE L'IMAGE D'ARRIÈRE-PLAN */
+        body { 
+    font-family: 'Poppins', sans-serif; 
+    /* On utilise un dégradé très léger (0.1) ou on le supprime pour une clarté maximale */
+    background: linear-gradient(rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.1)), 
+                url('images.png'); 
+    background-size: cover;       /* L'image couvre tout l'écran */
+    background-position: center;  /* Centrage parfait */
+    background-attachment: fixed; /* Effet parallaxe propre */
+    background-repeat: no-repeat;
+    color: #000; 
+    overflow-x: hidden; 
+}
+        
+        /* AFFICHAGE TOTAL DES IMAGES */
+        img{ width:100%; display:block; transition: transform 0.3s ease; }
+
+        header{
+            position:sticky;top:0;z-index:1000; background:#000; border-bottom:2px solid var(--gold);
+            padding:15px 30px; display:flex; justify-content:space-between; align-items:center;
+        }
+        .brand{display:flex;align-items:center;gap:12px;font-size:26px;font-weight:700;color:var(--gold);} 
+        .brand img{width:55px;height:55px;border-radius:50%;border:2px solid var(--gold); object-fit: cover;} 
+        
+        nav ul{list-style:none;display:flex;gap:20px;}
+        nav a{color:var(--gold);text-decoration:none;font-weight:500; transition: 0.3s;}
+        nav a:hover{opacity: 0.7;}
+
+        .header-right{display:flex;align-items:center;gap:15px;}
+        .panier-btn{ background:var(--gold);color:#000;padding:8px 18px;border-radius:30px;font-weight:700;cursor:pointer;position:relative; transition: 0.3s; }
+        .panier-btn:hover{ transform: scale(1.05); }
+        .badge{ position:absolute;top:-5px;right:-5px;background:red;color:white;font-size:12px;padding:2px 6px;border-radius:50%; }
+
+        .section{padding:60px 6%;}
+        .title{text-align:center;font-size:32px;margin-bottom:40px; position: relative;}
+        .title::after{ content:''; display:block; width:50px; height:3px; background:var(--gold); margin: 10px auto; }
+
+        .slider-track{display:flex;gap:25px;overflow-x:auto;scroll-behavior:smooth;padding:20px 5px;}
+        .slider-track::-webkit-scrollbar{height: 5px;}
+        .slider-track::-webkit-scrollbar-thumb{background: var(--gold); border-radius: 10px;}
+
+        /* CARTE PRODUIT : Image non coupée */
+        .card{ min-width:260px;background:white;border-radius:18px;overflow:hidden;box-shadow:0 10px 25px rgba(0,0,0,0.08);text-align:center;transition:.3s; display: flex; flex-direction: column; }
+        .card:hover{ transform: translateY(-10px); box-shadow: 0 15px 35px rgba(0,0,0,0.15); }
+        .card .img-container { 
+            overflow: hidden; height: 200px; display: flex; align-items: center; justify-content: center; background: #fff; padding: 10px; 
+        }
+        .card .img-container img{ max-width: 100%; max-height: 100%; width: auto; height: auto; object-fit: contain; }
+        .card:hover .img-container img{ transform: scale(1.08); }
+        
+        .card .info{padding:15px; flex-grow: 1; display: flex; flex-direction: column; justify-content: space-between;}
+        .price{color:var(--gold);font-weight:700;margin-bottom:10px;display:block; font-size: 18px;}
+        .btn-order{ display:inline-block;padding:8px 25px;border-radius:25px;background:var(--gold);color:#000;font-weight:600;cursor:pointer;text-decoration:none; transition: 0.3s;}
+
+        /* MODALS */
+        .modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.8);justify-content:center;align-items:center;z-index:2000; padding:20px; backdrop-filter: blur(5px);}
+        .modal-content{background:#fff;padding:25px;border-radius:20px;max-width:500px;width:100%;text-align:center; position:relative; max-height: 90vh; overflow-y: auto;}
+        
+        .modal-items{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin:20px 0}
+        .modal-items div{border:1px solid #eee;padding:10px;border-radius:12px;font-size:13px; background: #fafafa;}
+        .img-box {width:100%; height:80px; background:#fff; border-radius:8px; margin-bottom:8px; display: flex; justify-content: center; align-items: center; border: 1px solid #f0f0f0;}
+        .img-box img{max-width:100%; max-height:100%; object-fit:contain;}
+
+        select, input, textarea{ width:100%; padding:14px; margin:10px 0; border-radius:12px; border:1px solid #ddd; outline: none; transition: 0.3s; font-size: 14px;}
+        .input-valid { border-color: var(--success) !important; background-color: rgba(37, 211, 102, 0.05); }
+        .error-msg{ color: #e74c3c; font-size: 12px; display: none; margin-top: -5px; margin-bottom: 10px; text-align: left;}
+
+        .btn-confirm{background:var(--success);color:#fff;padding:15px;border:none;border-radius:35px;font-weight:700;cursor:pointer; width:100%; font-size: 16px; transition: 0.3s; margin-top: 10px;}
+        .btn-close{margin-top:15px;display:inline-block;color:#888;cursor:pointer;text-decoration:none; font-size: 14px;}
+
+        /* STYLE SUPPRESSION PANIER */
+        .cart-item-row{display:flex; justify-content:space-between; align-items: center; padding:12px 0; border-bottom:1px solid #eee;}
+        .remove-item { color: #ff4d4d; cursor: pointer; font-size: 18px; margin-left: 12px; font-weight: bold; transition: 0.3s; opacity: 0.6; }
+        .remove-item:hover { opacity: 1; transform: scale(1.2); }
+
+        footer{background:#000;color:var(--gold);text-align:center;padding:60px 20px; border-top: 3px solid var(--gold); margin-top: 40px;}
+        .trust-badges { display: flex; justify-content: center; gap: 20px; margin-bottom: 20px; font-size: 13px; flex-wrap: wrap; }
+
+        @media(max-width:768px){
+            nav ul{display:none;} 
+            .card{min-width:230px;}
+            .section{ padding: 40px 4%; }
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="brand"><img src="logo.png.jpg">Dar El Bahja</div>
+    <nav><ul>
+        <li><a href="#packs">Packs</a></li>
+        <li><a href="#fruits">Fruits Secs</a></li>
+        <li><a href="#epices">Épices</a></li>
+        <li><a href="#extras">Naturels</a></li>
+    </ul></nav>
+    <div class="header-right">
+        <div class="panier-btn" onclick="openCart()">🛒 <span id="cartCount" class="badge">0</span></div>
+    </div>
+</header>
+
+<section id="packs" class="section">
+    <h2 class="title">Nos Packs Premium</h2>
+    <div class="slider-track">
+        <div class="card"><div class="img-container"><img src="pack fakia 2.jpeg"></div><div class="info"><h4>Pack Fakia</h4><div class="price">149 DH</div><span class="btn-order" onclick="openPack('fakia')">Commander</span></div></div>
+        <div class="card"><div class="img-container"><img src="pack epices.jpeg"></div><div class="info"><h4>Pack épices</h4><div class="price">149 DH</div><span class="btn-order" onclick="openPack('épices')">Commander</span></div></div>
+        <div class="card"><div class="img-container"><img src="manaa.jpeg"></div><div class="info"><h4>Pack Manaa</h4><div class="price">140 DH</div><span class="btn-order" onclick="openPack('manaa')">Commander</span></div></div>
+        <div class="card"><div class="img-container"><img src="pack zaytona.jpeg"></div><div class="info"><h4>Pack Zaytona</h4><div class="price">135 DH</div><span class="btn-order" onclick="openPack('zaytona')">Commander</span></div></div>
+        <div class="card"><div class="img-container"><img src="pack ftor.jpeg"></div><div class="info"><h4>Pack Ftour</h4><div class="price">299 DH</div><span class="btn-order" onclick="openPack('ftour')">Commander</span></div></div>
+        <div class="card"><div class="img-container"><img src="pack bomb.jpeg"></div><div class="info"><h4>Pack Énergétique</h4><div class="price">129 DH</div><span class="btn-order" onclick="openPack('energie')">Commander</span></div></div>
+    </div>
+</section>
+
+<section id="fruits" class="section">
+    <h2 class="title">Fruits Secs</h2>
+    <div class="slider-track">
+        <div class="card"><div class="img-container"><img src="loz.png"></div><div class="info"><h4>Amandes</h4><div class="price">Dès 19 DH</div><span class="btn-order" onclick="openProductModal('Amandes', 19)">Ajouter</span></div></div>
+        <div class="card"><div class="img-container"><img src="noix.png"></div><div class="info"><h4>Noix</h4><div class="price">Dès 17 DH</div><span class="btn-order" onclick="openProductModal('Noix', 17)">Ajouter</span></div></div>
+        <div class="card"><div class="img-container"><img src="pistache image.jpeg"></div><div class="info"><h4>Pistaches</h4><div class="price">Dès 25 DH</div><span class="btn-order" onclick="openProductModal('Pistaches', 45)">Ajouter</span></div></div>
+        <div class="card"><div class="img-container"><img src="kawkaw.png"></div><div class="info"><h4>cacahuète</h4><div class="price">Dès 9 DH</div><span class="btn-order" onclick="openProductModal('cacahuète', 9)">Ajouter</span></div></div>
+        <div class="card"><div class="img-container"><img src="cajo.png"></div><div class="info"><h4>Acajou</h4><div class="price">Dès 26 DH</div><span class="btn-order" onclick="openProductModal('Acajou', 26)">Ajouter</span></div></div>
+        <div class="card"><div class="img-container"><img src="zbib.png"></div><div class="info"><h4>Rasine</h4><div class="price">Dès 11 DH</div><span class="btn-order" onclick="openProductModal('Rasine', 11)">Ajouter</span></div></div>
+        <div class="card"><div class="img-container"><img src="tmer.png"></div><div class="info"><h4>Dattes sokari</h4><div class="price">Dès 6 DH</div><span class="btn-order" onclick="openProductModal('Dattes sokari', 8)">Ajouter</span></div></div>
+      </div>
+</section>
+
+<section id="epices" class="section">
+    <h2 class="title">Épices Premium</h2>
+    <div class="slider-track">
+        <div class="card"><div class="img-container"><img src="curry.jpg"></div><div class="info"><h4>Curry</h4><div class="price">Dès 15 DH</div><span class="btn-order" onclick="openProductModal('Curry', 15)">Ajouter</span></div></div>
+        <div class="card"><div class="img-container"><img src="paprika.jpg"></div><div class="info"><h4>Paprika</h4><div class="price">Dès 12 DH</div><span class="btn-order" onclick="openProductModal('Paprika', 12)">Ajouter</span></div></div>
+        <div class="card"><div class="img-container"><img src="safran.jpg"></div><div class="info"><h4>Safran</h4><div class="price">Dès 120 DH</div><span class="btn-order" onclick="openProductModal('Safran', 120)">Ajouter</span></div></div>
+        <div class="card"><div class="img-container"><img src="gingembre.jpg"></div><div class="info"><h4>Gingembre</h4><div class="price">Dès 18 DH</div><span class="btn-order" onclick="openProductModal('Gingembre', 18)">Ajouter</span></div></div>
+    </div>
+</section>
+
+<section id="extras" class="section">
+    <h2 class="title">Produits Naturels</h2>
+    <div class="slider-track">
+        <div class="card"><div class="img-container"><img src="miel.jpg"></div><div class="info"><h4>Miel Naturel</h4><div class="price">Dès 45 DH</div><span class="btn-order" onclick="openProductModal('Miel Naturel', 45)">Ajouter</span></div></div>
+        <div class="card"><div class="img-container"><img src="huile-argan.jpg"></div><div class="info"><h4>Huile d'Argan</h4><div class="price">Dès 60 DH</div><span class="btn-order" onclick="openProductModal('Huile dArgan', 60)">Ajouter</span></div></div>
+        <div class="card"><div class="img-container"><img src="herbes.jpg"></div><div class="info"><h4>Herbes Séchées</h4><div class="price">Dès 20 DH</div><span class="btn-order" onclick="openProductModal('Herbes', 20)">Ajouter</span></div></div>
+    </div>
+</section>
+
+<div id="cartModal" class="modal">
+    <div class="modal-content">
+        <span class="btn-close" onclick="closeModals()" style="position:absolute;top:10px;right:15px;font-size:24px;">×</span>
+        <h3>Mon Panier 🛒</h3>
+        <div id="cartContent" style="margin:20px 0; max-height:250px; overflow-y:auto; text-align: left;"></div>
+        <div style="font-weight:700; font-size:22px; border-top:2px solid var(--gold); padding-top:15px; margin-bottom:20px; display:flex; justify-content:space-between;">Total: <span><span id="cartTotalDisplay">0</span> DH</span></div>
+        
+        <input type="text" id="custName" placeholder="Nom complet">
+        <input type="tel" id="custPhone" placeholder="06XXXXXXXX" maxlength="10" oninput="validatePhone(this, 'cartPhoneError')">
+        <span id="cartPhoneError" class="error-msg">Numéro marocain invalide</span>
+        <textarea id="custAddr" placeholder="Adresse complète de livraison"></textarea>
+        
+        <button class="btn-confirm" onclick="submitCartToWhatsApp()">Commander sur WhatsApp</button>
+    </div>
+</div>
+
+<div class="modal" id="packModal"><div class="modal-content">
+    <div id="packDetails"><h3 id="modalTitle"></h3><div class="modal-items" id="modalItems"></div><button class="btn-confirm" onclick="showForm()">Confirmer</button></div>
+    <div id="orderForm" style="display:none;">
+        <h3>Infos Livraison</h3>
+        <input type="text" id="clientName" placeholder="Nom complet">
+        <input type="tel" id="clientPhone" placeholder="06XXXXXXXX" maxlength="10" oninput="validatePhone(this, 'packPhoneError')">
+        <span id="packPhoneError" class="error-msg">Numéro invalide</span>
+        <textarea id="clientAddress" placeholder="Adresse exacte"></textarea>
+        <button class="btn-confirm" onclick="sendOrder()">Commander via WhatsApp</button>
+    </div>
+    <span class="btn-close" onclick="closeModals()">Retour</span>
+</div></div>
+
+<div id="productModal" class="modal"><div class="modal-content">
+    <h3 id="pModalTitle"></h3>
+    <select id="poidsSelect" onchange="updatePriceDisplay()">
+        <option value="125g" data-factor="1">125g</option><option value="250g" data-factor="2">250g</option><option value="500g" data-factor="4">500g</option><option value="1kg" data-factor="8">1kg</option>
+    </select>
+    <div style="font-size:32px; font-weight:700; color:var(--gold); margin:15px 0;"><span id="pModalPrice"></span> DH</div>
+    <button class="btn-confirm" onclick="confirmProductAdd()">Ajouter au Panier</button>
+    <br><span class="btn-close" onclick="closeModals()">Annuler</span>
+</div></div>
+
+<footer>
+    <div class="trust-badges"><span>🚚 Livraison Rapide</span><span>💳 Paiement Cash</span><span>⭐ Qualité Premium</span></div>
+    <p>&copy; 2026 Dar El Bahja. Tous droits réservés.</p>
+</footer>
+
+<script>
+const packs = {
+    fakia: { title: 'Pack Fakia – 149 DH', msg: 'Pack Fakia (149 DH)', items: [{n:'بيسطاش', g:'125g', img:'pistache.jpg'}, {n:'كاجو', g:'125g', img:'acajou.jpg'}, {n:'لوز', g:'125g', img:'amande.jpg'}, {n:'كاوكاو', g:'125g', img:'kawkaw.jpg'}, {n:'كركاع', g:'125g', img:'noix.jpg'}, {n:'تمور', g:'125g', img:'dattes.jpg'}, {n:'زبيب', g:'125g', img:'zbib.jpg'}]},
+    manaa: { title: 'Pack Manaa – 140 DH', msg: 'Pack Manaa (140 DH)', items: [{n:'تمر مجهول', g:'150g', img:'datte-mejhoul.jpg'}, {n:'شريحة', g:'150g', img:'figue.jpg'}, {n:'سمسم', g:'70g', img:'sesame.jpg'}, {n:'زيت زيتون', g:'200g', img:'huile-olive.jpg'}]},
+    zaytona: { title: 'Pack Zaytona – 135 DH', msg: 'Pack Zaytona (135 DH)', items: [{n:'Olives', g:'500g', img:'olives.jpg'}, {n:'Huile', g:'250ml', img:'huile-olive.jpg'}]},
+    ftour: { title: 'Pack Ftour – 299 DH', msg: 'Pack Ftour (299 DH)', items: [{n:'Chebakia', g:'500g', img:'chebakia.jpg'}, {n:'Dattes', g:'1kg', img:'dattes.jpg'}, {n:'Harira', g:'500g', img:'harira.jpg'}]},
+    energie: { title: 'Pack Énergétique – 129 DH', msg: 'Pack Énergétique (129 DH)', items: [{n:'Miel', g:'250g', img:'miel.jpg'}, {n:'Fruits secs', g:'300g', img:'amande.jpg'}]}
+};
+
+let cart = JSON.parse(localStorage.getItem('dar_el_bahja_cart')) || [];
+let tempProduct = {};
+let currentPackMsg = '';
+
+window.onload = () => { updateCartBadge(); };
+
+function updateCartBadge() {
+    document.getElementById('cartCount').innerText = cart.length;
+    localStorage.setItem('dar_el_bahja_cart', JSON.stringify(cart));
+}
+
+function validatePhone(input, errorId) {
+    const regex = /^(05|06|07)\d{8}$/;
+    if(regex.test(input.value)) { input.classList.add('input-valid'); document.getElementById(errorId).style.display = 'none'; }
+    else { input.classList.remove('input-valid'); }
+}
+
+function openPack(key) {
+    const p = packs[key]; currentPackMsg = p.msg;
+    document.getElementById('modalTitle').innerText = p.title;
+    document.getElementById('modalItems').innerHTML = p.items.map(i => `<div><div class="img-box"><img src="${i.img}"></div><p><b>${i.n}</b><br><span>${i.g}</span></p></div>`).join('');
+    document.getElementById('packModal').style.display = 'flex';
+}
+
+function showForm() { document.getElementById('packDetails').style.display = 'none'; document.getElementById('orderForm').style.display = 'block'; }
+
+function openProductModal(name, basePrice125g) {
+    tempProduct = { name, basePrice125g };
+    document.getElementById('pModalTitle').innerText = name;
+    updatePriceDisplay();
+    document.getElementById('productModal').style.display = 'flex';
+}
+
+function updatePriceDisplay() {
+    const factor = document.getElementById('poidsSelect').selectedOptions[0].getAttribute('data-factor');
+    document.getElementById('pModalPrice').innerText = tempProduct.basePrice125g * factor;
+}
+
+function confirmProductAdd() {
+    const poids = document.getElementById('poidsSelect').value;
+    const price = parseInt(document.getElementById('pModalPrice').innerText);
+    cart.push({ n: `${tempProduct.name} (${poids})`, p: price });
+    updateCartBadge();
+    closeModals();
+}
+
+function openCart() {
+    const c = document.getElementById('cartContent'); let total = 0;
+    c.innerHTML = cart.length === 0 ? "<p style='text-align:center;'>Panier vide</p>" : cart.map((i, index) => { 
+        total += i.p; 
+        return `<div class="cart-item-row"><span>${i.n}</span><div><b>${i.p} DH</b> <span class="remove-item" onclick="removeItem(${index})">×</span></div></div>` 
+    }).join('');
+    document.getElementById('cartTotalDisplay').innerText = total;
+    document.getElementById('cartModal').style.display = 'flex';
+}
+
+// FONCTION DE SUPPRESSION
+function removeItem(index) {
+    cart.splice(index, 1);
+    updateCartBadge();
+    openCart();
+}
+
+function submitCartToWhatsApp() {
+    const n = document.getElementById('custName').value, t = document.getElementById('custPhone').value, a = document.getElementById('custAddr').value;
+    if(!n || !t || !a || cart.length === 0) return alert("Veuillez remplir vos infos.");
+    if(!/^(05|06|07)\d{8}$/.test(t)) return alert("Téléphone invalide.");
+    let msg = `🌟 *COMMANDE DAR EL BAHJA* 🌟\n` + cart.map(i => `• ${i.n}: ${i.p} DH`).join('\n') + `\n\nTotal: ${document.getElementById('cartTotalDisplay').innerText} DH\n👤 Nom: ${n}\n📞 Tél: ${t}\n🏠 Adresse: ${a}`;
+    window.open(`https://wa.me/212680292447?text=${encodeURIComponent(msg)}`, '_blank');
+}
+
+function sendOrder() {
+    const n = document.getElementById('clientName').value, t = document.getElementById('clientPhone').value, a = document.getElementById('clientAddress').value;
+    if(!n || !t || !a) return alert("Infos manquantes.");
+    const msg = `🌟 *COMMANDE PACK* 🌟\n📦 *Pack:* ${currentPackMsg}\n👤 Nom: ${n}\n📞 Tél: ${t}\n🏠 Adresse: ${a}`;
+    window.open(`https://wa.me/212680292447?text=${encodeURIComponent(msg)}`, '_blank');
+}
+
+function closeModals() {
+    document.querySelectorAll('.modal').forEach(m => m.style.display = 'none');
+    document.getElementById('packDetails').style.display = 'block';
+    document.getElementById('orderForm').style.display = 'none';
+}
+</script>
+</body>
+>>>>>>> bb63a8f6d801ab271e2739fc1f53b6f132013457
 </html>
