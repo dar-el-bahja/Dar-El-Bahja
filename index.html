@@ -5,7 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dar El Bahja — Fruits Secs, Épices & Produits Naturels au Maroc</title>
     <meta name="description" content="Dar El Bahja vous propose depuis 1992 une sélection premium de fruits secs, épices, tisanes et produits naturels. Livraison partout au Maroc.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="preload" as="image" href="images.png" fetchpriority="high">
+    <link rel="preload" as="image" href="logo.png.jpg" fetchpriority="high">
+    <link rel="preload" as="image" href="maroc.png">
+    <link rel="preload" as="image" href="pack epices.jpeg">
+    <link rel="preload" as="image" href="pack ziton.png">
+    <link rel="preload" as="image" href="casablanca.png">
     <style>
         :root{
             --gold:#d4af37;--gold-light:#e8ca6a;--black:#000;--white:#fff;--gray:#f5f5f5;
@@ -77,8 +85,19 @@
         .slider-track::-webkit-scrollbar-thumb{background:var(--gold);border-radius:10px;}
         .card{min-width:250px;background:white;border-radius:18px;overflow:hidden;box-shadow:0 10px 25px rgba(0,0,0,0.08);text-align:center;transition:.3s;display:flex;flex-direction:column;}
         .card:hover,.card:focus-within{transform:translateY(-8px);box-shadow:0 15px 35px rgba(0,0,0,0.18);}
-        .card .img-container{overflow:hidden;height:190px;display:flex;align-items:center;justify-content:center;background:#fff;padding:10px;position:relative;}
-        .card .img-container img{max-width:100%;max-height:100%;width:auto;height:auto;object-fit:contain;}
+        .card .img-container{overflow:hidden;height:190px;display:flex;align-items:center;justify-content:center;background:linear-gradient(90deg,#f4f4f4 25%,#ececec 37%,#f4f4f4 63%);background-size:400% 100%;animation:imgSkeleton 1.4s ease infinite;padding:10px;position:relative;}
+        .card .img-container img{max-width:100%;max-height:100%;width:auto;height:auto;object-fit:contain;opacity:0;transition:opacity .35s ease;cursor:zoom-in;}
+        .card .img-container img.img-loaded{opacity:1;}
+        .card .img-container:has(img.img-loaded){background:#fff;animation:none;}
+        @keyframes imgSkeleton{0%{background-position:100% 0;}100%{background-position:0 0;}}
+
+        /* Lightbox image plein écran */
+        #lightboxModal{background:rgba(0,0,0,.92);}
+        #lightboxModal .lightbox-content{background:transparent;box-shadow:none;padding:0;max-width:92vw;width:auto;max-height:90vh;position:relative;}
+        #lightboxModal img{max-width:92vw;max-height:85vh;width:auto;height:auto;object-fit:contain;border-radius:14px;box-shadow:0 20px 60px rgba(0,0,0,.5);display:block;margin:0 auto;}
+        #lightboxModal .lightbox-caption{text-align:center;color:#fff;font-size:14px;font-weight:600;margin-top:14px;}
+        #lightboxModal .modal-x{background:rgba(255,255,255,.15);color:#fff;top:-14px;right:-14px;}
+        #lightboxModal .modal-x:hover{background:rgba(255,255,255,.3);color:#fff;}
         .card:hover .img-container img{transform:scale(1.08);}
         .card .info{padding:14px 15px 16px;flex-grow:1;display:flex;flex-direction:column;justify-content:space-between;gap:8px;}
         .card h4{font-size:14.5px;line-height:1.35;min-height:38px;}
@@ -190,7 +209,35 @@
             .panier-btn{padding:10px 16px;}
             .fab-stack{bottom:18px;right:16px;}
         }
-        .hamburger{display:none;flex-direction:column;gap:5px;cursor:pointer;padding:8px;background:none;border:none;}
+        .hamburger{display:none;flex-direction:column;gap:5px;cursor:pointer;padding:8px;background:none;border:none;position:relative;}
+
+        /* ===== INDICATEUR MENU (aide le visiteur à repérer le bouton menu) ===== */
+        .hamburger.hint-pulse::after{
+            content:'';position:absolute;inset:0;border-radius:50%;
+            box-shadow:0 0 0 0 rgba(212,175,55,0.65);
+            animation:menuPulse 1.6s ease-out infinite;pointer-events:none;
+        }
+        @keyframes menuPulse{
+            0%{box-shadow:0 0 0 0 rgba(212,175,55,0.65);}
+            70%{box-shadow:0 0 0 14px rgba(212,175,55,0);}
+            100%{box-shadow:0 0 0 0 rgba(212,175,55,0);}
+        }
+        .menu-hint-bubble{
+            position:fixed;top:calc(var(--header-h) + 6px);right:14px;z-index:1001;
+            background:var(--gold);color:#000;font-size:12.5px;font-weight:700;
+            padding:9px 14px;border-radius:12px;box-shadow:0 6px 18px rgba(0,0,0,.3);
+            display:flex;align-items:center;gap:6px;max-width:220px;
+            opacity:0;transform:translateY(-8px);transition:all .3s ease;pointer-events:none;
+        }
+        .menu-hint-bubble.show{opacity:1;transform:translateY(0);pointer-events:auto;}
+        .menu-hint-bubble::after{
+            content:'';position:absolute;top:-6px;right:22px;width:12px;height:12px;
+            background:var(--gold);transform:rotate(45deg);
+        }
+        .menu-hint-bubble .hint-close{background:rgba(0,0,0,.15);border:none;color:#000;
+            width:18px;height:18px;border-radius:50%;font-size:12px;line-height:1;cursor:pointer;
+            flex-shrink:0;display:flex;align-items:center;justify-content:center;}
+        @media(min-width:901px){.menu-hint-bubble{display:none;}}
         .hamburger span{display:block;width:24px;height:2px;background:var(--gold);border-radius:2px;transition:0.3s;}
         .hamburger.active span:nth-child(1){transform:rotate(45deg) translate(5px,5px);}
         .hamburger.active span:nth-child(2){opacity:0;}
@@ -209,8 +256,12 @@
 <div class="cart-notif" id="cartNotif" role="status" aria-live="polite"></div>
 
 <header>
-    <div class="brand"><img src="logo.png.jpg" alt="Logo Dar El Bahja">Dar El Bahja</div>
+    <div class="brand"><img src="logo.png.jpg" alt="Logo Dar El Bahja" width="50" height="50" loading="eager" fetchpriority="high" decoding="async">Dar El Bahja</div>
     <button class="hamburger" id="hamburgerBtn" onclick="toggleMenu()" aria-label="Ouvrir le menu" aria-expanded="false" aria-controls="mainNav"><span></span><span></span><span></span></button>
+    <div class="menu-hint-bubble" id="menuHintBubble">
+        👆 Cliquez ici pour voir toutes les catégories
+        <button class="hint-close" onclick="hideMenuHint()" aria-label="Fermer l'astuce">×</button>
+    </div>
     <nav id="mainNav">
         <ul>
             <li><a href="#packs" data-nav="packs">Packs</a></li>
@@ -258,14 +309,14 @@
     <h2 class="title">Nos Packs Premium</h2>
     <p class="subtitle">Des assortiments prêts à offrir ou à savourer, composés par nos soins.</p>
     <div class="slider-track">
-        <div class="card"><div class="img-container"><img src="maroc.png" alt="Pack Fakia"></div><div class="info"><h4>Pack Fakia</h4><div class="price">149 DH</div><button class="btn-order" onclick="openPack('fakia')">Commander</button></div></div>
-        <div class="card"><div class="img-container"><img src="pack epices.jpeg" alt="Pack Épices"></div><div class="info"><h4>Pack épices</h4><div class="price">149 DH</div><button class="btn-order" onclick="openPack('épices')">Commander</button></div></div>
-        <div class="card"><div class="img-container"><img src="pack ziton.png" alt="Pack Zaytona"></div><div class="info"><h4>Pack Zaytona</h4><div class="price">135 DH</div><button class="btn-order" onclick="openPack('zaytona')">Commander</button></div></div>
-        <div class="card"><div class="img-container"><img src="casablanca.png" alt="Pack Énergétique"></div><div class="info"><h4>Pack Énergétique</h4><div class="price">129 DH</div><button class="btn-order" onclick="openPack('energie')">Commander</button></div></div>
-        <div class="card"><div class="img-container"><img src="manaaaa.png" alt="Pack Manaa"></div><div class="info"><h4>Pack Manaa</h4><div class="price">140 DH</div><button class="btn-order" onclick="openPack('manaa')">Commander</button></div></div>
-        <div class="card"><div class="img-container"><img src="ftour.png" alt="Pack Ftour"></div><div class="info"><h4>Pack Ftour</h4><div class="price">299 DH</div><button class="btn-order" onclick="openPack('ftour')">Commander</button></div></div>
-        <div class="card"><div class="img-container"><img src="pack atay.png" alt="Pack Atay"></div><div class="info"><h4>Pack atay</h4><div class="price">199 DH</div><button class="btn-order" onclick="openPack('atay')">Commander</button></div></div>
-        <div class="card"><div class="img-container"><img src="SOU.png" alt="Pack Hssoua"></div><div class="info"><h4>Pack Hssoua</h4><div class="price">129 DH</div><button class="btn-order" onclick="openPack('hssowa')">Commander</button></div></div>
+        <div class="card"><div class="img-container"><img src="maroc.png" alt="Pack Fakia" width="250" height="190" loading="eager" fetchpriority="high" decoding="async" onclick="openLightbox(this)"></div><div class="info"><h4>Pack Fakia</h4><div class="price">149 DH</div><button class="btn-order" onclick="openPack('fakia')">Commander</button></div></div>
+        <div class="card"><div class="img-container"><img src="pack epices.jpeg" alt="Pack Épices" width="250" height="190" loading="eager" fetchpriority="high" decoding="async" onclick="openLightbox(this)"></div><div class="info"><h4>Pack épices</h4><div class="price">149 DH</div><button class="btn-order" onclick="openPack('épices')">Commander</button></div></div>
+        <div class="card"><div class="img-container"><img src="pack ziton.png" alt="Pack Zaytona" width="250" height="190" loading="eager" fetchpriority="high" decoding="async" onclick="openLightbox(this)"></div><div class="info"><h4>Pack Zaytona</h4><div class="price">135 DH</div><button class="btn-order" onclick="openPack('zaytona')">Commander</button></div></div>
+        <div class="card"><div class="img-container"><img src="casablanca.png" alt="Pack Énergétique" width="250" height="190" loading="eager" fetchpriority="high" decoding="async" onclick="openLightbox(this)"></div><div class="info"><h4>Pack Énergétique</h4><div class="price">129 DH</div><button class="btn-order" onclick="openPack('energie')">Commander</button></div></div>
+        <div class="card"><div class="img-container"><img src="manaaaa.png" alt="Pack Manaa" width="250" height="190" loading="eager" fetchpriority="high" decoding="async" onclick="openLightbox(this)"></div><div class="info"><h4>Pack Manaa</h4><div class="price">140 DH</div><button class="btn-order" onclick="openPack('manaa')">Commander</button></div></div>
+        <div class="card"><div class="img-container"><img src="ftour.png" alt="Pack Ftour" width="250" height="190" loading="eager" fetchpriority="high" decoding="async" onclick="openLightbox(this)"></div><div class="info"><h4>Pack Ftour</h4><div class="price">299 DH</div><button class="btn-order" onclick="openPack('ftour')">Commander</button></div></div>
+        <div class="card"><div class="img-container"><img src="pack atay.png" alt="Pack Atay" width="250" height="190" loading="eager" fetchpriority="high" decoding="async" onclick="openLightbox(this)"></div><div class="info"><h4>Pack atay</h4><div class="price">199 DH</div><button class="btn-order" onclick="openPack('atay')">Commander</button></div></div>
+        <div class="card"><div class="img-container"><img src="SOU.png" alt="Pack Hssoua" width="250" height="190" loading="eager" fetchpriority="high" decoding="async" onclick="openLightbox(this)"></div><div class="info"><h4>Pack Hssoua</h4><div class="price">129 DH</div><button class="btn-order" onclick="openPack('hssowa')">Commander</button></div></div>
     </div>
 </section>
 
@@ -273,26 +324,26 @@
     <h2 class="title">Fruits Secs</h2>
     <p class="subtitle">Amandes, noix, dattes et graines torréfiées, choisies pour leur fraîcheur.</p>
     <div class="slider-track">
-        <div class="card"><div class="img-container"><img src="amande.jpeg" alt="Amandes grillées"></div><div class="info"><h4>Amandes grillée - لوز مكلي</h4><div class="price">Dès 19 DH</div><button class="btn-order" onclick="openProductModal('Amandes - لوز', 19)">Ajouter</button></div></div>
-        <div class="card"><div class="img-container"><img src="amande 9erfa.jpeg" alt="Amandes à la cannelle"></div><div class="info"><h4>Amandes enrobées au cannelle - لوز بالقرفة</h4><div class="price">Dès 20 DH</div><button class="btn-order" onclick="openProductModal('Amandes enrobées au cannelle - لوز بالقرفة', 20)">Ajouter</button></div></div>
-        <div class="card"><div class="img-container"><img src="Amandes avec fenouil.jfif" alt="Amandes au fenouil"></div><div class="info"><h4>Amandes avec fenouil - لوز بالنافع</h4><div class="price">Dès 20 DH</div><button class="btn-order" onclick="openProductModal('Amandes avec fenouil - لوز بالنافع', 20)">Ajouter</button></div></div>
-        <div class="card"><div class="img-container"><img src="Amandes au Sésames.jfif" alt="Amandes au sésame"></div><div class="info"><h4>Amandes au Sésames - لوز بزنجلان</h4><div class="price">Dès 20 DH</div><button class="btn-order" onclick="openProductModal('Amandes au Sésames - لوز بزنجلان', 20)">Ajouter</button></div></div>
-        <div class="card"><div class="img-container"><img src="noix.jfif" alt="Noix"></div><div class="info"><h4>Noix - كركاع</h4><div class="price">Dès 17 DH</div><button class="btn-order" onclick="openProductModal('Noix - كركاع', 17)">Ajouter</button></div></div>
-        <div class="card"><div class="img-container"><img src="pistache.jpeg" alt="Pistaches"></div><div class="info"><h4>Pistaches - بيسطاش</h4><div class="price">Dès 25 DH</div><button class="btn-order" onclick="openProductModal('Pistaches - بيسطاش', 25)">Ajouter</button></div></div>
-        <div class="card"><div class="img-container"><img src="cajo.jpeg" alt="Noix de cajou"></div><div class="info"><h4>Noix de cajou - كاجو</h4><div class="price">Dès 26 DH</div><button class="btn-order" onclick="openProductModal('Noix de cajou - كاجو', 26)">Ajouter</button></div></div>
-        <div class="card"><div class="img-container"><img src="rasin sec .jpeg" alt="Raisins secs"></div><div class="info"><h4>Raisins secs - زبيب</h4><div class="price">Dès 11 DH</div><button class="btn-order" onclick="openProductModal('Raisins secs - زبيب', 11)">Ajouter</button></div></div>
-        <div class="card"><div class="img-container"><img src="dattes sokari.png" alt="Dattes Sokari"></div><div class="info"><h4>Dattes Sokari - تمر سكري</h4><div class="price">Dès 8 DH</div><button class="btn-order" onclick="openProductModal('Dattes Sokari - تمر سكري', 8)">Ajouter</button></div></div>
-        <div class="card"><div class="img-container"><img src="noix de pecan.jpeg" alt="Noix du Brésil"></div><div class="info"><h4>Noix du Brésil - جوز البرازيل</h4><div class="price">Dès 65 DH</div><button class="btn-order" onclick="openProductModal('Noix du Brésil - جوز البرازيل', 65)">Ajouter</button></div></div>
-        <div class="card"><div class="img-container"><img src="hmis.png" alt="Pois chiche turkish grillé"></div><div class="info"><h4>Pois Chiche turkish Grillé au sel - حمص تركي</h4><div class="price">Dès 15 DH</div><button class="btn-order" onclick="openProductModal('Pois Chiche turkish Grillé au sel - حمص تركي', 15)">Ajouter</button></div></div>
-        <div class="card"><div class="img-container"><img src="Maïs Salé Grillé.jfif" alt="Maïs salé grillé"></div><div class="info"><h4>Maïs Salé Grillé - درة</h4><div class="price">Dès 15 DH</div><button class="btn-order" onclick="openProductModal('Maïs Salé Grillé - درة', 15)">Ajouter</button></div></div>
-        <div class="card"><div class="img-container"><img src="goji.png" alt="Baies de Goji"></div><div class="info"><h4>Baies de Goji - توت الغوجي</h4><div class="price">Dès 45 DH</div><button class="btn-order" onclick="openProductModal('Baies de Goji - توت الغوجي', 45)">Ajouter</button></div></div>
-        <div class="card"><div class="img-container"><img src="noix de pecan.jpeg" alt="Noix de pécan"></div><div class="info"><h4>Noix de pécan - جوز البيكان</h4><div class="price">Dès 45 DH</div><button class="btn-order" onclick="openProductModal('Noix de pécan - جوز البيكان', 45)">Ajouter</button></div></div>
-        <div class="card"><div class="img-container"><img src="Macadamia.jfif" alt="Macadamia"></div><div class="info"><h4>Macadamia - مكضامية</h4><div class="price">Dès 55 DH</div><button class="btn-order" onclick="openProductModal('Macadamia - مكضامية', 55)">Ajouter</button></div></div>
-        <div class="card"><div class="img-container"><img src="noisette.jfif" alt="Noisettes crues"></div><div class="info"><h4>Noisettes crues - نوارط البندق</h4><div class="price">Dès 35 DH</div><button class="btn-order" onclick="openProductModal('Noisettes crues - نوارط البندق', 35)">Ajouter</button></div></div>
-        <div class="card"><div class="img-container"><img src="cajo zenjlan.jfif" alt="Noix de cajou au sésame"></div><div class="info"><h4>Noix de cajou au sésame - كاجو بالزنجلان</h4><div class="price">Dès 30 DH</div><button class="btn-order" onclick="openProductModal('Noix de cajou au sésame - كاجو بالزنجلان', 30)">Ajouter</button></div></div>
-        <div class="card"><div class="img-container"><img src="kawkaw frmag har.png" alt="Cacahuètes fromage piquant"></div><div class="info"><h4>Cacahuètes Fromage Piquant - كاوكاو بالجبن الحار</h4><div class="price">Dès 15 DH</div><button class="btn-order" onclick="openProductModal('Cacahuètes Fromage Piquant - كاوكاو بالجبن الحار', 15)">Ajouter</button></div></div>
-        <div class="card"><div class="img-container"><img src="kawkaw frmage har.png" alt="Cacahuètes fromage"></div><div class="info"><h4>Cacahuètes Fromage - كاوكاو بالجبن </h4><div class="price">Dès 15 DH</div><button class="btn-order" onclick="openProductModal('Cacahuètes Fromage - كاوكاو بالجبن', 15)">Ajouter</button></div></div>
-        <div class="card"><div class="img-container"><img src="cacahuette.jpeg" alt="Cacahuètes"></div><div class="info"><h4>Cacahuètes - كاوكاو</h4><div class="price">Dès 9 DH</div><button class="btn-order" onclick="openProductModal('Cacahuètes - كاوكاو', 9)">Ajouter</button></div></div>
+        <div class="card"><div class="img-container"><img src="amande.jpeg" alt="Amandes grillées" width="250" height="190" loading="lazy" decoding="async" onclick="openLightbox(this)"></div><div class="info"><h4>Amandes grillée - لوز مكلي</h4><div class="price">Dès 19 DH</div><button class="btn-order" onclick="openProductModal('Amandes - لوز', 19)">Ajouter</button></div></div>
+        <div class="card"><div class="img-container"><img src="amande 9erfa.jpeg" alt="Amandes à la cannelle" width="250" height="190" loading="lazy" decoding="async" onclick="openLightbox(this)"></div><div class="info"><h4>Amandes enrobées au cannelle - لوز بالقرفة</h4><div class="price">Dès 20 DH</div><button class="btn-order" onclick="openProductModal('Amandes enrobées au cannelle - لوز بالقرفة', 20)">Ajouter</button></div></div>
+        <div class="card"><div class="img-container"><img src="Amandes avec fenouil.jfif" alt="Amandes au fenouil" width="250" height="190" loading="lazy" decoding="async" onclick="openLightbox(this)"></div><div class="info"><h4>Amandes avec fenouil - لوز بالنافع</h4><div class="price">Dès 20 DH</div><button class="btn-order" onclick="openProductModal('Amandes avec fenouil - لوز بالنافع', 20)">Ajouter</button></div></div>
+        <div class="card"><div class="img-container"><img src="Amandes au Sésames.jfif" alt="Amandes au sésame" width="250" height="190" loading="lazy" decoding="async" onclick="openLightbox(this)"></div><div class="info"><h4>Amandes au Sésames - لوز بزنجلان</h4><div class="price">Dès 20 DH</div><button class="btn-order" onclick="openProductModal('Amandes au Sésames - لوز بزنجلان', 20)">Ajouter</button></div></div>
+        <div class="card"><div class="img-container"><img src="noix.jfif" alt="Noix" width="250" height="190" loading="lazy" decoding="async" onclick="openLightbox(this)"></div><div class="info"><h4>Noix - كركاع</h4><div class="price">Dès 17 DH</div><button class="btn-order" onclick="openProductModal('Noix - كركاع', 17)">Ajouter</button></div></div>
+        <div class="card"><div class="img-container"><img src="pistache.jpeg" alt="Pistaches" width="250" height="190" loading="lazy" decoding="async" onclick="openLightbox(this)"></div><div class="info"><h4>Pistaches - بيسطاش</h4><div class="price">Dès 25 DH</div><button class="btn-order" onclick="openProductModal('Pistaches - بيسطاش', 25)">Ajouter</button></div></div>
+        <div class="card"><div class="img-container"><img src="cajo.jpeg" alt="Noix de cajou" width="250" height="190" loading="lazy" decoding="async" onclick="openLightbox(this)"></div><div class="info"><h4>Noix de cajou - كاجو</h4><div class="price">Dès 26 DH</div><button class="btn-order" onclick="openProductModal('Noix de cajou - كاجو', 26)">Ajouter</button></div></div>
+        <div class="card"><div class="img-container"><img src="rasin sec .jpeg" alt="Raisins secs" width="250" height="190" loading="lazy" decoding="async" onclick="openLightbox(this)"></div><div class="info"><h4>Raisins secs - زبيب</h4><div class="price">Dès 11 DH</div><button class="btn-order" onclick="openProductModal('Raisins secs - زبيب', 11)">Ajouter</button></div></div>
+        <div class="card"><div class="img-container"><img src="dattes sokari.png" alt="Dattes Sokari" width="250" height="190" loading="lazy" decoding="async" onclick="openLightbox(this)"></div><div class="info"><h4>Dattes Sokari - تمر سكري</h4><div class="price">Dès 8 DH</div><button class="btn-order" onclick="openProductModal('Dattes Sokari - تمر سكري', 8)">Ajouter</button></div></div>
+        <div class="card"><div class="img-container"><img src="noix de pecan.jpeg" alt="Noix du Brésil" width="250" height="190" loading="lazy" decoding="async" onclick="openLightbox(this)"></div><div class="info"><h4>Noix du Brésil - جوز البرازيل</h4><div class="price">Dès 65 DH</div><button class="btn-order" onclick="openProductModal('Noix du Brésil - جوز البرازيل', 65)">Ajouter</button></div></div>
+        <div class="card"><div class="img-container"><img src="hmis.png" alt="Pois chiche turkish grillé" width="250" height="190" loading="lazy" decoding="async" onclick="openLightbox(this)"></div><div class="info"><h4>Pois Chiche turkish Grillé au sel - حمص تركي</h4><div class="price">Dès 15 DH</div><button class="btn-order" onclick="openProductModal('Pois Chiche turkish Grillé au sel - حمص تركي', 15)">Ajouter</button></div></div>
+        <div class="card"><div class="img-container"><img src="Maïs Salé Grillé.jfif" alt="Maïs salé grillé" width="250" height="190" loading="lazy" decoding="async" onclick="openLightbox(this)"></div><div class="info"><h4>Maïs Salé Grillé - درة</h4><div class="price">Dès 15 DH</div><button class="btn-order" onclick="openProductModal('Maïs Salé Grillé - درة', 15)">Ajouter</button></div></div>
+        <div class="card"><div class="img-container"><img src="goji.png" alt="Baies de Goji" width="250" height="190" loading="lazy" decoding="async" onclick="openLightbox(this)"></div><div class="info"><h4>Baies de Goji - توت الغوجي</h4><div class="price">Dès 45 DH</div><button class="btn-order" onclick="openProductModal('Baies de Goji - توت الغوجي', 45)">Ajouter</button></div></div>
+        <div class="card"><div class="img-container"><img src="noix de pecan.jpeg" alt="Noix de pécan" width="250" height="190" loading="lazy" decoding="async" onclick="openLightbox(this)"></div><div class="info"><h4>Noix de pécan - جوز البيكان</h4><div class="price">Dès 45 DH</div><button class="btn-order" onclick="openProductModal('Noix de pécan - جوز البيكان', 45)">Ajouter</button></div></div>
+        <div class="card"><div class="img-container"><img src="Macadamia.jfif" alt="Macadamia" width="250" height="190" loading="lazy" decoding="async" onclick="openLightbox(this)"></div><div class="info"><h4>Macadamia - مكضامية</h4><div class="price">Dès 55 DH</div><button class="btn-order" onclick="openProductModal('Macadamia - مكضامية', 55)">Ajouter</button></div></div>
+        <div class="card"><div class="img-container"><img src="noisette.jfif" alt="Noisettes crues" width="250" height="190" loading="lazy" decoding="async" onclick="openLightbox(this)"></div><div class="info"><h4>Noisettes crues - نوارط البندق</h4><div class="price">Dès 35 DH</div><button class="btn-order" onclick="openProductModal('Noisettes crues - نوارط البندق', 35)">Ajouter</button></div></div>
+        <div class="card"><div class="img-container"><img src="cajo zenjlan.jfif" alt="Noix de cajou au sésame" width="250" height="190" loading="lazy" decoding="async" onclick="openLightbox(this)"></div><div class="info"><h4>Noix de cajou au sésame - كاجو بالزنجلان</h4><div class="price">Dès 30 DH</div><button class="btn-order" onclick="openProductModal('Noix de cajou au sésame - كاجو بالزنجلان', 30)">Ajouter</button></div></div>
+        <div class="card"><div class="img-container"><img src="kawkaw frmag har.png" alt="Cacahuètes fromage piquant" width="250" height="190" loading="lazy" decoding="async" onclick="openLightbox(this)"></div><div class="info"><h4>Cacahuètes Fromage Piquant - كاوكاو بالجبن الحار</h4><div class="price">Dès 15 DH</div><button class="btn-order" onclick="openProductModal('Cacahuètes Fromage Piquant - كاوكاو بالجبن الحار', 15)">Ajouter</button></div></div>
+        <div class="card"><div class="img-container"><img src="kawkaw frmage har.png" alt="Cacahuètes fromage" width="250" height="190" loading="lazy" decoding="async" onclick="openLightbox(this)"></div><div class="info"><h4>Cacahuètes Fromage - كاوكاو بالجبن </h4><div class="price">Dès 15 DH</div><button class="btn-order" onclick="openProductModal('Cacahuètes Fromage - كاوكاو بالجبن', 15)">Ajouter</button></div></div>
+        <div class="card"><div class="img-container"><img src="cacahuette.jpeg" alt="Cacahuètes" width="250" height="190" loading="lazy" decoding="async" onclick="openLightbox(this)"></div><div class="info"><h4>Cacahuètes - كاوكاو</h4><div class="price">Dès 9 DH</div><button class="btn-order" onclick="openProductModal('Cacahuètes - كاوكاو', 9)">Ajouter</button></div></div>
     </div>
 </section>
 
@@ -300,19 +351,19 @@
     <h2 class="title">Chocolats & Bonbons</h2>
     <p class="subtitle">Nogas artisanaux et bonbons gélifiés pour toutes les envies gourmandes.</p>
     <div class="slider-track">
-        <div class="card"><div class="img-container"><img src="chocolat draget.jfif" alt="Chocolat Dragée"></div><div class="info"><h4>Chocolat Dragée</h4><div class="price">Dès 25 DH</div><button class="btn-order" onclick="openProductModal('Chocolat Dragée', 25)">Ajouter</button></div></div>
-        <div class="card"><div class="img-container"><img src="chocolat tajj.jfif" alt="Chocolat Tajj"></div><div class="info"><h4>Chocolat Tajj</h4><div class="price">Dès 35 DH</div><button class="btn-order" onclick="openProductModal('Chocolat Tajj', 35)">Ajouter</button></div></div>
-        <div class="card"><div class="img-container"><img src="noga loz.jfif" alt="Noga Amande"></div><div class="info"><h4>Noga Amande - نوكا باللوز</h4><div class="price">Dès 30 DH</div><button class="btn-order" onclick="openProductModal('Noga Amande - نوكا باللوز', 30)">Ajouter</button></div></div>
-        <div class="card"><div class="img-container"><img src="noga cacahuet.jfif" alt="Noga Cacahuète"></div><div class="info"><h4>Noga Cacahuète - نوكا بالكاوكاو</h4><div class="price">Dès 20 DH</div><button class="btn-order" onclick="openProductModal('Noga Cacahuète - نوكا بالكاوكاو', 20)">Ajouter</button></div></div>
-        <div class="card"><div class="img-container"><img src="noga pistache.jfif" alt="Noga Pistache"></div><div class="info"><h4>Noga Pistache - نوكا بالفستق</h4><div class="price">Dès 40 DH</div><button class="btn-order" onclick="openProductModal('Noga Pistache - نوكا بالفستق', 40)">Ajouter</button></div></div>
-        <div class="card"><div class="img-container"><img src="noga fleurs.jfif" alt="Noga aux fleurs"></div><div class="info"><h4>Noga Wrd - نوكا بالورد</h4><div class="price">Dès 30 DH</div><button class="btn-order" onclick="openProductModal('Noga Wrd - نوكا بالورد', 30)">Ajouter</button></div></div>
-        <div class="card"><div class="img-container"><img src="noga konafa.jfif" alt="Noga Konafa"></div><div class="info"><h4>Noga Konafa - نوكا بالكنافة</h4><div class="price">Dès 35 DH</div><button class="btn-order" onclick="openProductModal('Noga Konafa - نوكا بالكنافة', 35)">Ajouter</button></div></div>
-        <div class="card"><div class="img-container"><img src="bonbon mix.jfif" alt="Bonbons mix"></div><div class="info"><h4>Bonbons Gellifier - Mix </h4><div class="price">Dès 25 DH</div><button class="btn-order" onclick="openProductModal('Bonbons Gellifier - Mix', 20)">Ajouter</button></div></div>
-        <div class="card"><div class="img-container"><img src="bombon orange.jfif" alt="Bonbons orange"></div><div class="info"><h4>Bonbons Gellifier - Orange 🍊</h4><div class="price">Dès 20 DH</div><button class="btn-order" onclick="openProductModal('Bonbons Gellifier - Orange', 20)">Ajouter</button></div></div>
-        <div class="card"><div class="img-container"><img src="bonbon citron.jfif" alt="Bonbons citron"></div><div class="info"><h4>Bonbons Gellifier - Citron 🍋</h4><div class="price">Dès 20 DH</div><button class="btn-order" onclick="openProductModal('Bonbons Gellifier - Citron', 20)">Ajouter</button></div></div>
-        <div class="card"><div class="img-container"><img src="bombon fraise.jfif" alt="Bonbons fraise"></div><div class="info"><h4>Bonbons Gellifier - Fraise 🍓</h4><div class="price">Dès 20 DH</div><button class="btn-order" onclick="openProductModal('Bonbons Gellifier - Fraise', 20)">Ajouter</button></div></div>
-        <div class="card"><div class="img-container"><img src="bonbon cerise.jfif" alt="Bonbons cerise"></div><div class="info"><h4>Bonbons Gellifier - Cerise 🍒</h4><div class="price">Dès 20 DH</div><button class="btn-order" onclick="openProductModal('Bonbons Gellifier - Cerise', 20)">Ajouter</button></div></div>
-        <div class="card"><div class="img-container"><img src="bobon pomme.jfif" alt="Bonbons pomme"></div><div class="info"><h4>Bonbons Gellifier - Pomme 🍏</h4><div class="price">Dès 20 DH</div><button class="btn-order" onclick="openProductModal('Bonbons Gellifier - Pomme', 20)">Ajouter</button></div></div>
+        <div class="card"><div class="img-container"><img src="chocolat draget.jfif" alt="Chocolat Dragée" width="250" height="190" loading="lazy" decoding="async" onclick="openLightbox(this)"></div><div class="info"><h4>Chocolat Dragée</h4><div class="price">Dès 25 DH</div><button class="btn-order" onclick="openProductModal('Chocolat Dragée', 25)">Ajouter</button></div></div>
+        <div class="card"><div class="img-container"><img src="chocolat tajj.jfif" alt="Chocolat Tajj" width="250" height="190" loading="lazy" decoding="async" onclick="openLightbox(this)"></div><div class="info"><h4>Chocolat Tajj</h4><div class="price">Dès 35 DH</div><button class="btn-order" onclick="openProductModal('Chocolat Tajj', 35)">Ajouter</button></div></div>
+        <div class="card"><div class="img-container"><img src="noga loz.jfif" alt="Noga Amande" width="250" height="190" loading="lazy" decoding="async" onclick="openLightbox(this)"></div><div class="info"><h4>Noga Amande - نوكا باللوز</h4><div class="price">Dès 30 DH</div><button class="btn-order" onclick="openProductModal('Noga Amande - نوكا باللوز', 30)">Ajouter</button></div></div>
+        <div class="card"><div class="img-container"><img src="noga cacahuet.jfif" alt="Noga Cacahuète" width="250" height="190" loading="lazy" decoding="async" onclick="openLightbox(this)"></div><div class="info"><h4>Noga Cacahuète - نوكا بالكاوكاو</h4><div class="price">Dès 20 DH</div><button class="btn-order" onclick="openProductModal('Noga Cacahuète - نوكا بالكاوكاو', 20)">Ajouter</button></div></div>
+        <div class="card"><div class="img-container"><img src="noga pistache.jfif" alt="Noga Pistache" width="250" height="190" loading="lazy" decoding="async" onclick="openLightbox(this)"></div><div class="info"><h4>Noga Pistache - نوكا بالفستق</h4><div class="price">Dès 40 DH</div><button class="btn-order" onclick="openProductModal('Noga Pistache - نوكا بالفستق', 40)">Ajouter</button></div></div>
+        <div class="card"><div class="img-container"><img src="noga fleurs.jfif" alt="Noga aux fleurs" width="250" height="190" loading="lazy" decoding="async" onclick="openLightbox(this)"></div><div class="info"><h4>Noga Wrd - نوكا بالورد</h4><div class="price">Dès 30 DH</div><button class="btn-order" onclick="openProductModal('Noga Wrd - نوكا بالورد', 30)">Ajouter</button></div></div>
+        <div class="card"><div class="img-container"><img src="noga konafa.jfif" alt="Noga Konafa" width="250" height="190" loading="lazy" decoding="async" onclick="openLightbox(this)"></div><div class="info"><h4>Noga Konafa - نوكا بالكنافة</h4><div class="price">Dès 35 DH</div><button class="btn-order" onclick="openProductModal('Noga Konafa - نوكا بالكنافة', 35)">Ajouter</button></div></div>
+        <div class="card"><div class="img-container"><img src="bonbon mix.jfif" alt="Bonbons mix" width="250" height="190" loading="lazy" decoding="async" onclick="openLightbox(this)"></div><div class="info"><h4>Bonbons Gellifier - Mix </h4><div class="price">Dès 25 DH</div><button class="btn-order" onclick="openProductModal('Bonbons Gellifier - Mix', 20)">Ajouter</button></div></div>
+        <div class="card"><div class="img-container"><img src="bombon orange.jfif" alt="Bonbons orange" width="250" height="190" loading="lazy" decoding="async" onclick="openLightbox(this)"></div><div class="info"><h4>Bonbons Gellifier - Orange 🍊</h4><div class="price">Dès 20 DH</div><button class="btn-order" onclick="openProductModal('Bonbons Gellifier - Orange', 20)">Ajouter</button></div></div>
+        <div class="card"><div class="img-container"><img src="bonbon citron.jfif" alt="Bonbons citron" width="250" height="190" loading="lazy" decoding="async" onclick="openLightbox(this)"></div><div class="info"><h4>Bonbons Gellifier - Citron 🍋</h4><div class="price">Dès 20 DH</div><button class="btn-order" onclick="openProductModal('Bonbons Gellifier - Citron', 20)">Ajouter</button></div></div>
+        <div class="card"><div class="img-container"><img src="bombon fraise.jfif" alt="Bonbons fraise" width="250" height="190" loading="lazy" decoding="async" onclick="openLightbox(this)"></div><div class="info"><h4>Bonbons Gellifier - Fraise 🍓</h4><div class="price">Dès 20 DH</div><button class="btn-order" onclick="openProductModal('Bonbons Gellifier - Fraise', 20)">Ajouter</button></div></div>
+        <div class="card"><div class="img-container"><img src="bonbon cerise.jfif" alt="Bonbons cerise" width="250" height="190" loading="lazy" decoding="async" onclick="openLightbox(this)"></div><div class="info"><h4>Bonbons Gellifier - Cerise 🍒</h4><div class="price">Dès 20 DH</div><button class="btn-order" onclick="openProductModal('Bonbons Gellifier - Cerise', 20)">Ajouter</button></div></div>
+        <div class="card"><div class="img-container"><img src="bobon pomme.jfif" alt="Bonbons pomme" width="250" height="190" loading="lazy" decoding="async" onclick="openLightbox(this)"></div><div class="info"><h4>Bonbons Gellifier - Pomme 🍏</h4><div class="price">Dès 20 DH</div><button class="btn-order" onclick="openProductModal('Bonbons Gellifier - Pomme', 20)">Ajouter</button></div></div>
     </div>
 </section>
 
@@ -320,17 +371,17 @@
     <h2 class="title">Épices Premium</h2>
     <p class="subtitle">Les indispensables de la cuisine marocaine, moulus et contrôlés.</p>
     <div class="slider-track">
-        <div class="card"><div class="img-container"><img src="kmon bldi.png" alt="Cumin beldi"></div><div class="info"><h4>كمون بلدي</h4><div class="price">Dès 25 DH</div><button class="btn-order" onclick="openProductModal('كمون بلدي', 25)">Ajouter</button></div></div>
-        <div class="card"><div class="img-container"><img src="kmon missr.png" alt="Cumin égyptien"></div><div class="info"><h4>كمون مصري</h4><div class="price">Dès 20 DH</div><button class="btn-order" onclick="openProductModal('كمون مصري', 20)">Ajouter</button></div></div>
-        <div class="card"><div class="img-container"><img src="khr9om.png" alt="Curcuma"></div><div class="info"><h4>كركم ممتاز</h4><div class="price">Dès 9 DH</div><button class="btn-order" onclick="openProductModal('كركم ممتاز', 9)">Ajouter</button></div></div>
-        <div class="card"><div class="img-container"><img src="jemjem.png" alt="Gingembre moulu"></div><div class="info"><h4>زنجبيل مطحون</h4><div class="price">Dès 12 DH</div><button class="btn-order" onclick="openProductModal('زنجبيل مطحون', 12)">Ajouter</button></div></div>
-        <div class="card"><div class="img-container"><img src="paprika.png" alt="Paprika moulu"></div><div class="info"><h4>فلفل أحمر مطحون</h4><div class="price">Dès 9 DH</div><button class="btn-order" onclick="openProductModal('فلفل أحمر مطحون', 9)">Ajouter</button></div></div>
-        <div class="card"><div class="img-container"><img src="poivre noir.png" alt="Poivre noir moulu"></div><div class="info"><h4>إبزار مطحون</h4><div class="price">Dès 15 DH</div><button class="btn-order" onclick="openProductModal('إبزار مطحون', 15)">Ajouter</button></div></div>
-        <div class="card"><div class="img-container"><img src="kzbr.png" alt="Coriandre moulue"></div><div class="info"><h4>قزبر مطحون</h4><div class="price">Dès 8 DH</div><button class="btn-order" onclick="openProductModal('قزبر مطحون', 8)">Ajouter</button></div></div>
-        <div class="card"><div class="img-container"><img src="kefa.png" alt="Cannelle moulue"></div><div class="info"><h4>قرفة مطحونة</h4><div class="price">Dès 15 DH</div><button class="btn-order" onclick="openProductModal('قرفة مطحونة', 15)">Ajouter</button></div></div>
-        <div class="card"><div class="img-container"><img src="toma.png" alt="Ail"></div><div class="info"><h4>التوم</h4><div class="price">Dès 10 DH</div><button class="btn-order" onclick="openProductModal('التوم', 10)">Ajouter</button></div></div>
-        <div class="card"><div class="img-container"><img src="toma smid.png" alt="Ail moulu"></div><div class="info"><h4>توم مطحون</h4><div class="price">Dès 20 DH</div><button class="btn-order" onclick="openProductModal('توم مطحون', 20)">Ajouter</button></div></div>
-        <div class="card"><div class="img-container"><img src="bssla smid.png" alt="Oignon moulu"></div><div class="info"><h4>بصل مطحون</h4><div class="price">Dès 20 DH</div><button class="btn-order" onclick="openProductModal('بصل مطحون', 20)">Ajouter</button></div></div>
+        <div class="card"><div class="img-container"><img src="kmon bldi.png" alt="Cumin beldi" width="250" height="190" loading="lazy" decoding="async" onclick="openLightbox(this)"></div><div class="info"><h4>كمون بلدي</h4><div class="price">Dès 25 DH</div><button class="btn-order" onclick="openProductModal('كمون بلدي', 25)">Ajouter</button></div></div>
+        <div class="card"><div class="img-container"><img src="kmon missr.png" alt="Cumin égyptien" width="250" height="190" loading="lazy" decoding="async" onclick="openLightbox(this)"></div><div class="info"><h4>كمون مصري</h4><div class="price">Dès 20 DH</div><button class="btn-order" onclick="openProductModal('كمون مصري', 20)">Ajouter</button></div></div>
+        <div class="card"><div class="img-container"><img src="khr9om.png" alt="Curcuma" width="250" height="190" loading="lazy" decoding="async" onclick="openLightbox(this)"></div><div class="info"><h4>كركم ممتاز</h4><div class="price">Dès 9 DH</div><button class="btn-order" onclick="openProductModal('كركم ممتاز', 9)">Ajouter</button></div></div>
+        <div class="card"><div class="img-container"><img src="jemjem.png" alt="Gingembre moulu" width="250" height="190" loading="lazy" decoding="async" onclick="openLightbox(this)"></div><div class="info"><h4>زنجبيل مطحون</h4><div class="price">Dès 12 DH</div><button class="btn-order" onclick="openProductModal('زنجبيل مطحون', 12)">Ajouter</button></div></div>
+        <div class="card"><div class="img-container"><img src="paprika.png" alt="Paprika moulu" width="250" height="190" loading="lazy" decoding="async" onclick="openLightbox(this)"></div><div class="info"><h4>فلفل أحمر مطحون</h4><div class="price">Dès 9 DH</div><button class="btn-order" onclick="openProductModal('فلفل أحمر مطحون', 9)">Ajouter</button></div></div>
+        <div class="card"><div class="img-container"><img src="poivre noir.png" alt="Poivre noir moulu" width="250" height="190" loading="lazy" decoding="async" onclick="openLightbox(this)"></div><div class="info"><h4>إبزار مطحون</h4><div class="price">Dès 15 DH</div><button class="btn-order" onclick="openProductModal('إبزار مطحون', 15)">Ajouter</button></div></div>
+        <div class="card"><div class="img-container"><img src="kzbr.png" alt="Coriandre moulue" width="250" height="190" loading="lazy" decoding="async" onclick="openLightbox(this)"></div><div class="info"><h4>قزبر مطحون</h4><div class="price">Dès 8 DH</div><button class="btn-order" onclick="openProductModal('قزبر مطحون', 8)">Ajouter</button></div></div>
+        <div class="card"><div class="img-container"><img src="kefa.png" alt="Cannelle moulue" width="250" height="190" loading="lazy" decoding="async" onclick="openLightbox(this)"></div><div class="info"><h4>قرفة مطحونة</h4><div class="price">Dès 15 DH</div><button class="btn-order" onclick="openProductModal('قرفة مطحونة', 15)">Ajouter</button></div></div>
+        <div class="card"><div class="img-container"><img src="toma.png" alt="Ail" width="250" height="190" loading="lazy" decoding="async" onclick="openLightbox(this)"></div><div class="info"><h4>التوم</h4><div class="price">Dès 10 DH</div><button class="btn-order" onclick="openProductModal('التوم', 10)">Ajouter</button></div></div>
+        <div class="card"><div class="img-container"><img src="toma smid.png" alt="Ail moulu" width="250" height="190" loading="lazy" decoding="async" onclick="openLightbox(this)"></div><div class="info"><h4>توم مطحون</h4><div class="price">Dès 20 DH</div><button class="btn-order" onclick="openProductModal('توم مطحون', 20)">Ajouter</button></div></div>
+        <div class="card"><div class="img-container"><img src="bssla smid.png" alt="Oignon moulu" width="250" height="190" loading="lazy" decoding="async" onclick="openLightbox(this)"></div><div class="info"><h4>بصل مطحون</h4><div class="price">Dès 20 DH</div><button class="btn-order" onclick="openProductModal('بصل مطحون', 20)">Ajouter</button></div></div>
     </div>
 </section>
 
@@ -338,13 +389,13 @@
     <h2 class="title">Graines & Céréales</h2>
     <p class="subtitle">Graines bio et céréales riches en nutriments, pour une alimentation équilibrée.</p>
     <div class="slider-track">
-        <div class="card"><div class="img-container"><img src="krwya.jfif" alt="Graines de carvi"></div><div class="info"><h4>Graines de carvi - بذور الكروية</h4><div class="price">Dès 19 DH</div><button class="btn-order" onclick="openProductModal('Graines de carvi - بذور الكروية', 19)">Ajouter</button></div></div>
-        <div class="card"><div class="img-container"><img src="chya.jfif" alt="Graines de chia"></div><div class="info"><h4>Graines de chia Bio</h4><div class="price">Dès 31 DH</div><button class="btn-order" onclick="openProductModal('Graines de chia Bio', 31)">Ajouter</button></div></div>
-        <div class="card"><div class="img-container"><img src="ilan.jfif" alt="Graines de millet"></div><div class="info"><h4>Graines De Millet - إيلان</h4><div class="price">Dès 10 DH</div><button class="btn-order" onclick="openProductModal('Graines De Millet - إيلان', 10)">Ajouter</button></div></div>
-        <div class="card"><div class="img-container"><img src="nwar chmss.jfif" alt="Graines de tournesol"></div><div class="info"><h4>Graines de tournesol</h4><div class="price">Dès 14 DH</div><button class="btn-order" onclick="openProductModal('Graines de tournesol', 14)">Ajouter</button></div></div>
-        <div class="card"><div class="img-container"><img src="Quinoa noir.jfif" alt="Quinoa noir"></div><div class="info"><h4>Quinoa noir - كينوا سوداء</h4><div class="price">Dès 11 DH</div><button class="btn-order" onclick="openProductModal('Quinoa noir - كينوا سوداء', 11)">Ajouter</button></div></div>
-        <div class="card"><div class="img-container"><img src="Graines de Sésame Noir.jfif" alt="Graines de sésame noir"></div><div class="info"><h4>Graines de Sésame Noir</h4><div class="price">Dès 18 DH</div><button class="btn-order" onclick="openProductModal('Graines de Sésame Noir', 18)">Ajouter</button></div></div>
-        <div class="card"><div class="img-container"><img src="Graines de Luzerne (Alfalfa).jfif" alt="Graines de luzerne"></div><div class="info"><h4>Graines de Luzerne (Alfalfa)</h4><div class="price">Dès 50 DH</div><button class="btn-order" onclick="openProductModal('Graines de Luzerne (Alfalfa)', 50)">Ajouter</button></div></div>
+        <div class="card"><div class="img-container"><img src="krwya.jfif" alt="Graines de carvi" width="250" height="190" loading="lazy" decoding="async" onclick="openLightbox(this)"></div><div class="info"><h4>Graines de carvi - بذور الكروية</h4><div class="price">Dès 19 DH</div><button class="btn-order" onclick="openProductModal('Graines de carvi - بذور الكروية', 19)">Ajouter</button></div></div>
+        <div class="card"><div class="img-container"><img src="chya.jfif" alt="Graines de chia" width="250" height="190" loading="lazy" decoding="async" onclick="openLightbox(this)"></div><div class="info"><h4>Graines de chia Bio</h4><div class="price">Dès 31 DH</div><button class="btn-order" onclick="openProductModal('Graines de chia Bio', 31)">Ajouter</button></div></div>
+        <div class="card"><div class="img-container"><img src="ilan.jfif" alt="Graines de millet" width="250" height="190" loading="lazy" decoding="async" onclick="openLightbox(this)"></div><div class="info"><h4>Graines De Millet - إيلان</h4><div class="price">Dès 10 DH</div><button class="btn-order" onclick="openProductModal('Graines De Millet - إيلان', 10)">Ajouter</button></div></div>
+        <div class="card"><div class="img-container"><img src="nwar chmss.jfif" alt="Graines de tournesol" width="250" height="190" loading="lazy" decoding="async" onclick="openLightbox(this)"></div><div class="info"><h4>Graines de tournesol</h4><div class="price">Dès 14 DH</div><button class="btn-order" onclick="openProductModal('Graines de tournesol', 14)">Ajouter</button></div></div>
+        <div class="card"><div class="img-container"><img src="Quinoa noir.jfif" alt="Quinoa noir" width="250" height="190" loading="lazy" decoding="async" onclick="openLightbox(this)"></div><div class="info"><h4>Quinoa noir - كينوا سوداء</h4><div class="price">Dès 11 DH</div><button class="btn-order" onclick="openProductModal('Quinoa noir - كينوا سوداء', 11)">Ajouter</button></div></div>
+        <div class="card"><div class="img-container"><img src="Graines de Sésame Noir.jfif" alt="Graines de sésame noir" width="250" height="190" loading="lazy" decoding="async" onclick="openLightbox(this)"></div><div class="info"><h4>Graines de Sésame Noir</h4><div class="price">Dès 18 DH</div><button class="btn-order" onclick="openProductModal('Graines de Sésame Noir', 18)">Ajouter</button></div></div>
+        <div class="card"><div class="img-container"><img src="Graines de Luzerne (Alfalfa).jfif" alt="Graines de luzerne" width="250" height="190" loading="lazy" decoding="async" onclick="openLightbox(this)"></div><div class="info"><h4>Graines de Luzerne (Alfalfa)</h4><div class="price">Dès 50 DH</div><button class="btn-order" onclick="openProductModal('Graines de Luzerne (Alfalfa)', 50)">Ajouter</button></div></div>
     </div>
 </section>
 
@@ -352,12 +403,12 @@
     <h2 class="title">Tisanes & Infusions</h2>
     <p class="subtitle">الأعشاب المنسمة الطبيعية — des plantes naturelles pour un moment de détente.</p>
     <div class="slider-track">
-        <div class="card"><div class="img-container"><img src="lwiza.jfif" alt="Verveine"></div><div class="info"><h4>Verveine - اللويزة</h4><div class="price">Dès 15 DH</div><button class="btn-order" onclick="openProductModal('Verveine - اللويزة', 15, 'tisane')">Ajouter</button></div></div>
-        <div class="card"><div class="img-container"><img src="babonje.jfif" alt="Camomille"></div><div class="info"><h4>Camomille - البابونج</h4><div class="price">Dès 15 DH</div><button class="btn-order" onclick="openProductModal('Camomille - البابونج', 15, 'tisane')">Ajouter</button></div></div>
-        <div class="card"><div class="img-container"><img src="Thym.jfif" alt="Thym"></div><div class="info"><h4>Thym - الزعتر البلدي</h4><div class="price">Dès 15 DH</div><button class="btn-order" onclick="openProductModal('Thym - الزعتر', 15, 'tisane')">Ajouter</button></div></div>
-        <div class="card"><div class="img-container"><img src="Menthe Pouliot.jfif" alt="Menthe pouliot"></div><div class="info"><h4>Menthe Pouliot - فليو</h4><div class="price">Dès 15 DH</div><button class="btn-order" onclick="openProductModal('Menthe Pouliot - فليو', 15, 'tisane')">Ajouter</button></div></div>
-        <div class="card"><div class="img-container"><img src="Hibiscus.jfif" alt="Hibiscus"></div><div class="info"><h4>Hibiscus - الكركديه</h4><div class="price">Dès 15 DH</div><button class="btn-order" onclick="openProductModal('Hibiscus - الكركديه', 15, 'tisane')">Ajouter</button></div></div>
-        <div class="card"><div class="img-container"><img src="Thé Vert Gunpowder.jfif" alt="Thé vert Gunpowder"></div><div class="info"><h4>Thé Vert Gunpowder</h4><div class="price">Dès 15 DH</div><button class="btn-order" onclick="openProductModal('Thé Vert Gunpowder', 15, 'tisane')">Ajouter</button></div></div>
+        <div class="card"><div class="img-container"><img src="lwiza.jfif" alt="Verveine" width="250" height="190" loading="lazy" decoding="async" onclick="openLightbox(this)"></div><div class="info"><h4>Verveine - اللويزة</h4><div class="price">Dès 15 DH</div><button class="btn-order" onclick="openProductModal('Verveine - اللويزة', 15, 'tisane')">Ajouter</button></div></div>
+        <div class="card"><div class="img-container"><img src="babonje.jfif" alt="Camomille" width="250" height="190" loading="lazy" decoding="async" onclick="openLightbox(this)"></div><div class="info"><h4>Camomille - البابونج</h4><div class="price">Dès 15 DH</div><button class="btn-order" onclick="openProductModal('Camomille - البابونج', 15, 'tisane')">Ajouter</button></div></div>
+        <div class="card"><div class="img-container"><img src="Thym.jfif" alt="Thym" width="250" height="190" loading="lazy" decoding="async" onclick="openLightbox(this)"></div><div class="info"><h4>Thym - الزعتر البلدي</h4><div class="price">Dès 15 DH</div><button class="btn-order" onclick="openProductModal('Thym - الزعتر', 15, 'tisane')">Ajouter</button></div></div>
+        <div class="card"><div class="img-container"><img src="Menthe Pouliot.jfif" alt="Menthe pouliot" width="250" height="190" loading="lazy" decoding="async" onclick="openLightbox(this)"></div><div class="info"><h4>Menthe Pouliot - فليو</h4><div class="price">Dès 15 DH</div><button class="btn-order" onclick="openProductModal('Menthe Pouliot - فليو', 15, 'tisane')">Ajouter</button></div></div>
+        <div class="card"><div class="img-container"><img src="Hibiscus.jfif" alt="Hibiscus" width="250" height="190" loading="lazy" decoding="async" onclick="openLightbox(this)"></div><div class="info"><h4>Hibiscus - الكركديه</h4><div class="price">Dès 15 DH</div><button class="btn-order" onclick="openProductModal('Hibiscus - الكركديه', 15, 'tisane')">Ajouter</button></div></div>
+        <div class="card"><div class="img-container"><img src="Thé Vert Gunpowder.jfif" alt="Thé vert Gunpowder" width="250" height="190" loading="lazy" decoding="async" onclick="openLightbox(this)"></div><div class="info"><h4>Thé Vert Gunpowder</h4><div class="price">Dès 15 DH</div><button class="btn-order" onclick="openProductModal('Thé Vert Gunpowder', 15, 'tisane')">Ajouter</button></div></div>
     </div>
 </section>
 
@@ -365,14 +416,14 @@
     <h2 class="title">Produits Naturels & Amlou</h2>
     <p class="subtitle">Huiles pressées et amlou artisanal, préparés selon la tradition.</p>
     <div class="slider-track">
-        <div class="card"><div class="img-container"><img src="argan.jfif" alt="Huile d'argan"></div><div class="info"><h4>Huile d'Argan</h4><div class="price">Dès 80 DH</div><button class="btn-order" onclick="openProductModal(\"Huile d'Argan\", 80)">Ajouter</button></div></div>
-        <div class="card"><div class="img-container"><img src="ol.jfif" alt="Huile d'olive"></div><div class="info"><h4>Huile d'olive</h4><div class="price">Dès 20 DH</div><button class="btn-order" onclick="openProductModal(\"Huile d'olive\", 20)">Ajouter</button></div></div>
-        <div class="card"><div class="img-container"><img src="amlou amande.jfif" alt="Amlou aux amandes"></div><div class="info"><h4>Amlou Amandes - أملو باللوز</h4><div class="price">Dès 25 DH</div><button class="btn-order" onclick="openProductModal('Amlou Amandes - أملو باللوز', 25)">Ajouter</button></div></div>
-        <div class="card"><div class="img-container"><img src="amlou pistache.jfif" alt="Amlou pistache"></div><div class="info"><h4>Amlou Pistache - أملو بالفستق</h4><div class="price">Dès 44 DH</div><button class="btn-order" onclick="openProductModal('Amlou Pistache - أملو بالفستق', 44)">Ajouter</button></div></div>
-        <div class="card"><div class="img-container"><img src="amlou cajo.jfif" alt="Amlou cajou"></div><div class="info"><h4>Amlou Cajou - أملو بالكاجو</h4><div class="price">Dès 44 DH</div><button class="btn-order" onclick="openProductModal('Amlou Cajou - أملو بالكاجو', 44)">Ajouter</button></div></div>
-        <div class="card"><div class="img-container"><img src="amlou chocolat.jfif" alt="Amlou chocolat"></div><div class="info"><h4>Amlou Chocolat - أملو بالشوكولاتة</h4><div class="price">Dès 32 DH</div><button class="btn-order" onclick="openProductModal('Amlou Chocolat - أملو بالشوكولاتة', 32)">Ajouter</button></div></div>
-        <div class="card"><div class="img-container"><img src="amlou kawkaw.jfif" alt="Amlou cacahuète"></div><div class="info"><h4>Amlou Cacahuète - أملو بكاوكاو</h4><div class="price">Dès 13 DH</div><button class="btn-order" onclick="openProductModal('Amlou Cacahuète - أملو بكاوكاو', 13)">Ajouter</button></div></div>
-        <div class="card"><div class="img-container"><img src="amlou gri3a.jfif" alt="Amlou graines de courge"></div><div class="info"><h4>Amlou Graines de courge</h4><div class="price">Dès 19 DH</div><button class="btn-order" onclick="openProductModal('Amlou Graines de courge', 19)">Ajouter</button></div></div>
+        <div class="card"><div class="img-container"><img src="argan.jfif" alt="Huile d'argan" width="250" height="190" loading="lazy" decoding="async" onclick="openLightbox(this)"></div><div class="info"><h4>Huile d'Argan</h4><div class="price">Dès 80 DH</div><button class="btn-order" onclick="openProductModal(\"Huile d'Argan\", 80)">Ajouter</button></div></div>
+        <div class="card"><div class="img-container"><img src="ol.jfif" alt="Huile d'olive" width="250" height="190" loading="lazy" decoding="async" onclick="openLightbox(this)"></div><div class="info"><h4>Huile d'olive</h4><div class="price">Dès 20 DH</div><button class="btn-order" onclick="openProductModal(\"Huile d'olive\", 20)">Ajouter</button></div></div>
+        <div class="card"><div class="img-container"><img src="amlou amande.jfif" alt="Amlou aux amandes" width="250" height="190" loading="lazy" decoding="async" onclick="openLightbox(this)"></div><div class="info"><h4>Amlou Amandes - أملو باللوز</h4><div class="price">Dès 25 DH</div><button class="btn-order" onclick="openProductModal('Amlou Amandes - أملو باللوز', 25)">Ajouter</button></div></div>
+        <div class="card"><div class="img-container"><img src="amlou pistache.jfif" alt="Amlou pistache" width="250" height="190" loading="lazy" decoding="async" onclick="openLightbox(this)"></div><div class="info"><h4>Amlou Pistache - أملو بالفستق</h4><div class="price">Dès 44 DH</div><button class="btn-order" onclick="openProductModal('Amlou Pistache - أملو بالفستق', 44)">Ajouter</button></div></div>
+        <div class="card"><div class="img-container"><img src="amlou cajo.jfif" alt="Amlou cajou" width="250" height="190" loading="lazy" decoding="async" onclick="openLightbox(this)"></div><div class="info"><h4>Amlou Cajou - أملو بالكاجو</h4><div class="price">Dès 44 DH</div><button class="btn-order" onclick="openProductModal('Amlou Cajou - أملو بالكاجو', 44)">Ajouter</button></div></div>
+        <div class="card"><div class="img-container"><img src="amlou chocolat.jfif" alt="Amlou chocolat" width="250" height="190" loading="lazy" decoding="async" onclick="openLightbox(this)"></div><div class="info"><h4>Amlou Chocolat - أملو بالشوكولاتة</h4><div class="price">Dès 32 DH</div><button class="btn-order" onclick="openProductModal('Amlou Chocolat - أملو بالشوكولاتة', 32)">Ajouter</button></div></div>
+        <div class="card"><div class="img-container"><img src="amlou kawkaw.jfif" alt="Amlou cacahuète" width="250" height="190" loading="lazy" decoding="async" onclick="openLightbox(this)"></div><div class="info"><h4>Amlou Cacahuète - أملو بكاوكاو</h4><div class="price">Dès 13 DH</div><button class="btn-order" onclick="openProductModal('Amlou Cacahuète - أملو بكاوكاو', 13)">Ajouter</button></div></div>
+        <div class="card"><div class="img-container"><img src="amlou gri3a.jfif" alt="Amlou graines de courge" width="250" height="190" loading="lazy" decoding="async" onclick="openLightbox(this)"></div><div class="info"><h4>Amlou Graines de courge</h4><div class="price">Dès 19 DH</div><button class="btn-order" onclick="openProductModal('Amlou Graines de courge', 19)">Ajouter</button></div></div>
     </div>
 </section>
 
@@ -440,6 +491,12 @@
     </div>
     <div style="font-size:32px;font-weight:700;color:var(--gold);margin:8px 0;"><span id="pModalPrice"></span> DH</div>
     <button class="btn-confirm" onclick="confirmProductAdd()">🛒 Ajouter au Panier</button>
+</div></div>
+
+<div id="lightboxModal" class="modal" role="dialog" aria-modal="true" aria-label="Image agrandie"><div class="modal-content lightbox-content">
+    <button class="modal-x" onclick="closeModals()" aria-label="Fermer l'image">×</button>
+    <img id="lightboxImg" src="" alt="">
+    <p class="lightbox-caption" id="lightboxCaption"></p>
 </div></div>
 
 <div id="thankYouModal" class="modal" role="dialog" aria-modal="true"><div class="modal-content">
@@ -561,13 +618,45 @@ window.onload=()=>{
     setupNavHighlight();
     populateReviewProductSelect();
     renderPublicReviews();
+    initMenuHint();
 };
+
+/* ===== ASTUCE MENU (aide le visiteur à trouver la navigation) ===== */
+function initMenuHint(){
+    if(window.innerWidth>900) return; // uniquement mobile, là où le menu est caché
+    if(sessionStorage.getItem('deb_menu_hint_seen')) return; // déjà vu pendant cette visite
+    const btn=document.getElementById('hamburgerBtn');
+    const bubble=document.getElementById('menuHintBubble');
+    btn.classList.add('hint-pulse');
+    setTimeout(()=>bubble.classList.add('show'), 400);
+    setTimeout(()=>hideMenuHint(), 6000); // disparaît automatiquement
+}
+function hideMenuHint(){
+    document.getElementById('hamburgerBtn').classList.remove('hint-pulse');
+    document.getElementById('menuHintBubble').classList.remove('show');
+    sessionStorage.setItem('deb_menu_hint_seen','1');
+}
+
+/* Révèle chaque image en fondu dès qu'elle est réellement chargée (cache ou réseau) */
+function revealImages(){
+    document.querySelectorAll('.img-container img').forEach(img=>{
+        if(img.complete && img.naturalWidth>0){
+            img.classList.add('img-loaded');
+        }else{
+            img.addEventListener('load',()=>img.classList.add('img-loaded'));
+            img.addEventListener('error',()=>img.classList.add('img-loaded'));
+        }
+    });
+}
+revealImages();
+document.addEventListener('DOMContentLoaded',revealImages);
 
 function saveCart(){localStorage.setItem('deb_cart_v2',JSON.stringify(cart));}
 function updateCartBadge(){document.getElementById('cartCount').innerText=cart.reduce((s,i)=>s+i.qty,0);saveCart();}
 
 /* ===== NAV / MENU ===== */
 function toggleMenu(){
+    hideMenuHint();
     const btn=document.getElementById('hamburgerBtn');
     const nav=document.getElementById('mainNav');
     const open=nav.classList.toggle('open');
@@ -619,6 +708,15 @@ document.querySelectorAll('.modal').forEach(m=>{
 document.addEventListener('keydown',(e)=>{
     if(e.key==='Escape') closeModals();
 });
+
+/* ===== LIGHTBOX IMAGE ===== */
+function openLightbox(imgEl){
+    const lb=document.getElementById('lightboxImg');
+    lb.src=imgEl.src;
+    lb.alt=imgEl.alt;
+    document.getElementById('lightboxCaption').innerText=imgEl.alt||'';
+    document.getElementById('lightboxModal').style.display='flex';
+}
 
 /* ===== PACKS ===== */
 function openPack(key){
