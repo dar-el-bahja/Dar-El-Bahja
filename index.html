@@ -529,13 +529,14 @@
     <input type="email" id="adminEmailInput" placeholder="Email admin" autocomplete="username">
     <input type="password" id="adminPasswordInput" placeholder="Mot de passe admin" autocomplete="current-password">
     <span id="adminLoginError" style="color:#e74c3c;font-size:12px;display:none;">Identifiants incorrects.</span>
-    <button class="btn-confirm" onclick="checkAdminPassword()" style="margin-top:8px;">Connexion</button>
+    <button class="btn-confirm" id="adminLoginBtn" onclick="checkAdminPassword()" style="margin-top:8px;">Connexion</button>
 </div></div>
 
 <div id="adminModal" class="modal" role="dialog" aria-modal="true"><div class="modal-content" style="max-width:720px;">
     <button onclick="closeAdmin()" class="modal-x" aria-label="Fermer">×</button>
     <h3 style="margin-bottom:4px;">⚙️ Panel Admin — Dar El Bahja</h3>
     <p style="font-size:12px;color:#aaa;margin-bottom:14px;" id="adminDateDisplay"></p>
+    <button onclick="logoutAdmin()" style="position:absolute;top:14px;right:56px;background:#fff0f0;border:1px solid #ffcccc;color:#e74c3c;border-radius:20px;padding:6px 14px;font-size:12px;font-weight:600;cursor:pointer;">🔓 Déconnexion</button>
     <div class="admin-tabs">
         <button class="admin-tab active" onclick="switchTab('commandes')">📦 Commandes</button>
         <button class="admin-tab" onclick="switchTab('stats')">📊 Chiffre d'affaires</button>
@@ -582,7 +583,6 @@
 </div>
 
 <script>
-const API = 'http://localhost:3000';
 const MOIS_FR = ['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
 const STATUTS_CONFIG = [
     {val:'recue',label:'🆕 Reçue',cls:'statut-recue'},
@@ -600,6 +600,7 @@ let currentPackMsg = '';
 let currentPackData = {};
 let currentProductType = 'standard';
 let adminFiltreStatut = 'tous';
+let adminCommandesCache = [];
 let currentReviewStars = 0;
 
 const packs = {
@@ -791,49 +792,22 @@ function openCart(){
 function changeQty(idx,delta){cart[idx].qty+=delta;if(cart[idx].qty<=0)cart.splice(idx,1);updateCartBadge();openCart();}
 function removeItem(idx){cart.splice(idx,1);updateCartBadge();openCart();}
 
-/* ===== SAVE ORDER ===== */
+/* ===== SAVE ORDER (Firestore) ===== */
 async function saveCommande(client, items, totalProduits, fraisLivraison, type) {
+    const totalFinal = totalProduits + fraisLivraison;
+    const docData = {
+        client, items, totalProduits, fraisLivraison, totalFinal, type,
+        statut: 'recue',
+        dateCommande: new Date().toISOString(),
+        historiqueStatut: [{statut:'recue',date:new Date().toISOString(),note:'Commande reçue'}]
+    };
     try {
-        const response = await fetch(API + '/api/commandes', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                client,
-                items: items.map(i => ({ nom: i.n, poids: i.n, prix: i.p || 0 })),
-                totalProduits,
-                fraisLivraison,
-                canal: type === 'pack' ? 'site_pack' : 'site_panier'
-            })
-        });
-        const data = await response.json();
-        if (!response.ok) throw new Error(data.erreur || 'Erreur API');
-        const ref = 'CMD-' + data.idCommande;
-        const commande = {
-            id: data.idCommande, ref, client, items,
-            totalProduits, fraisLivraison,
-            totalFinal: data.totalFinal, type, statut: 'recue',
-            dateCommande: new Date().toISOString(),
-            historiqueStatut: [{statut:'recue',date:new Date().toISOString(),note:'Commande enregistrée MySQL'}]
-        };
-        const commandes = JSON.parse(localStorage.getItem('deb_commandes') || '[]');
-        commandes.unshift(commande);
-        localStorage.setItem('deb_commandes', JSON.stringify(commandes));
-        return commande;
+        const newId = await window.FirebaseAPI.addCommande(docData);
+        return { id: newId, ref: 'CMD-' + newId.slice(-6).toUpperCase(), ...docData };
     } catch (err) {
-        console.warn('Fallback localStorage:', err.message);
-        const id = Date.now();
-        const commande = {
-            id, ref: 'CMD-' + id.toString().slice(-5),
-            client, items, totalProduits, fraisLivraison,
-            totalFinal: totalProduits + fraisLivraison,
-            type, statut: 'recue',
-            dateCommande: new Date().toISOString(),
-            historiqueStatut: [{statut:'recue',date:new Date().toISOString(),note:'Commande hors ligne'}]
-        };
-        const commandes = JSON.parse(localStorage.getItem('deb_commandes') || '[]');
-        commandes.unshift(commande);
-        localStorage.setItem('deb_commandes', JSON.stringify(commandes));
-        return commande;
+        console.error('Erreur Firestore (commande):', err.message);
+        alert("⚠️ La commande n'a pas pu être enregistrée en ligne. Vérifiez votre connexion internet et réessayez.");
+        throw err;
     }
 }
 
@@ -859,7 +833,13 @@ async function prepareAndSubmitOrder(){
     btn.disabled=true;btn.innerText='Envoi en cours...';
 
     const items=cart.map(i=>({n:i.n,qty:i.qty,p:i.prixUnit*i.qty}));
-    const commande=await saveCommande({nom:n,telephone:t,adresse:a},items,cartTotal,30,'panier');
+    let commande;
+    try{
+        commande=await saveCommande({nom:n,telephone:t,adresse:a},items,cartTotal,30,'panier');
+    }catch(e){
+        btn.disabled=false;btn.innerText='Confirmer la commande';
+        return;
+    }
     const msg=`🌟 *COMMANDE DAR EL BAHJA* 🌟\n`+items.map(i=>`• ${i.n} x${i.qty} : ${i.p} DH`).join('\n')+`\n\n*Total Produits:* ${cartTotal} DH\n*Livraison:* 30 DH\n*TOTAL FINAL:* ${finalPrice} DH\n\n👤 *Client:* ${n}\n📞 *Tél:* ${t}\n🏠 *Adresse:* ${a}`;
     cart=[];updateCartBadge();closeModals();
     document.getElementById('thankRef').innerText=commande.ref;
@@ -879,7 +859,13 @@ async function sendOrder(){
     btn.disabled=true;btn.innerText='Envoi en cours...';
 
     const packItems=currentPackData.items?currentPackData.items.map(i=>({n:i.n+' '+i.g,qty:1,p:0})):[];
-    const commande=await saveCommande({nom:n,telephone:t,adresse:a},packItems,currentPackData.prix||0,30,'pack');
+    let commande;
+    try{
+        commande=await saveCommande({nom:n,telephone:t,adresse:a},packItems,currentPackData.prix||0,30,'pack');
+    }catch(e){
+        btn.disabled=false;btn.innerText='Commander via WhatsApp';
+        return;
+    }
     const msg=`🌟 *COMMANDE PACK* 🌟\n📦 *Pack:* ${currentPackMsg}\n👤 Nom: ${n}\n📞 Tél: ${t}\n🏠 Adresse: ${a}`;
     closeModals();
     document.getElementById('thankRef').innerText=commande.ref;
@@ -925,7 +911,7 @@ document.querySelectorAll('#starsInput span').forEach(star=>{
         });
     });
 });
-function submitReview(){
+async function submitReview(){
     const product=document.getElementById('reviewProduct').value;
     const name=document.getElementById('reviewName').value.trim();
     const text=document.getElementById('reviewText').value.trim();
@@ -933,25 +919,28 @@ function submitReview(){
         alert('Merci de renseigner votre nom, votre note et votre commentaire.');
         return;
     }
-    const key='reviews_'+product;
-    const reviews=JSON.parse(localStorage.getItem(key)||'[]');
-    reviews.push({name,stars:currentReviewStars,text,date:new Date().toISOString()});
-    localStorage.setItem(key,JSON.stringify(reviews));
-    closeModals();
-    showNotif('✅ Merci pour votre avis !');
-    renderPublicReviews();
+    try{
+        await window.FirebaseAPI.addReview({
+            product, name, stars: currentReviewStars, text,
+            date: new Date().toISOString()
+        });
+        closeModals();
+        showNotif('✅ Merci pour votre avis !');
+        renderPublicReviews();
+    }catch(e){
+        console.error('Erreur Firestore (avis):', e.message);
+        alert("⚠️ Votre avis n'a pas pu être envoyé. Vérifiez votre connexion internet.");
+    }
 }
-function renderPublicReviews(){
+async function renderPublicReviews(){
     const track=document.getElementById('publicReviewsTrack');
     const empty=document.getElementById('noPublicReviews');
-    const keys=Object.keys(localStorage).filter(k=>k.startsWith('reviews_'));
     let allReviews=[];
-    keys.forEach(key=>{
-        const prod=key.replace('reviews_','');
-        const reviews=JSON.parse(localStorage.getItem(key)||'[]');
-        reviews.forEach(r=>allReviews.push({...r,product:prod}));
-    });
-    allReviews.sort((a,b)=>new Date(b.date)-new Date(a.date));
+    try{
+        allReviews = await window.FirebaseAPI.getReviews();
+    }catch(e){
+        console.warn('Impossible de charger les avis:', e.message);
+    }
     if(allReviews.length===0){
         track.innerHTML='';empty.style.display='block';return;
     }
@@ -971,18 +960,34 @@ function openAdminLogin(){document.getElementById('adminEmailInput').value='';do
 async function checkAdminPassword(){
     const email=document.getElementById('adminEmailInput').value.trim();
     const pwd=document.getElementById('adminPasswordInput').value;
+    const errEl=document.getElementById('adminLoginError');
+    const btn=document.getElementById('adminLoginBtn');
+    errEl.style.display='none';
+    if(btn){btn.disabled=true;btn.innerText='Connexion...';}
     try {
-        const res=await fetch(API+'/api/auth/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email,motDePasse:pwd})});
-        const data=await res.json();
-        if(res.ok){localStorage.setItem('admin_token',data.token);closeModals();openAdminPanel();}
-        else{document.getElementById('adminLoginError').style.display='block';}
-    } catch {
-        if(pwd==='darelbahja2024'){closeModals();openAdminPanel();}
-        else{document.getElementById('adminLoginError').style.display='block';}
+        await window.FirebaseAPI.login(email, pwd);
+        closeModals();
+        openAdminPanel();
+    } catch (e) {
+        errEl.innerText='Email ou mot de passe incorrect.';
+        errEl.style.display='block';
+    } finally {
+        if(btn){btn.disabled=false;btn.innerText='Connexion';}
     }
 }
 
-function openAdminPanel(){document.getElementById('adminDateDisplay').innerText='Connecté le '+new Date().toLocaleString('fr-MA',{dateStyle:'long',timeStyle:'short'});switchTab('commandes');document.getElementById('adminModal').style.display='flex';}
+function logoutAdmin(){
+    window.FirebaseAPI.logout();
+    closeAdmin();
+    closeModals();
+}
+
+function openAdminPanel(){
+    const email = window.FirebaseAPI.getCurrentAdminEmail();
+    document.getElementById('adminDateDisplay').innerText = (email?'Connecté : '+email+' — ':'')+new Date().toLocaleString('fr-MA',{dateStyle:'long',timeStyle:'short'});
+    switchTab('commandes');
+    document.getElementById('adminModal').style.display='flex';
+}
 
 function switchTab(tab){
     document.querySelectorAll('.admin-tab').forEach((t,i)=>{
@@ -998,36 +1003,16 @@ function switchTab(tab){
 
 async function chargerCommandes() {
     try {
-        const token=localStorage.getItem('admin_token');
-        if(token){
-            const res=await fetch(API+'/api/commandes',{headers:{'Authorization':'Bearer '+token}});
-            if(res.ok){
-                const data=await res.json();
-                const formatted=data.map(c=>({
-                    id:c.id_commande,
-                    ref:'CMD-'+c.id_commande,
-                    client:{nom:c.nom_complet,telephone:c.telephone,adresse:c.adresse},
-                    items:(c.lignes||[]).map(l=>({
-                        n: l.poids_choisi || 'Article',
-                        qty: 1,
-                        p: parseFloat(l.prix_unitaire)||0
-                    })),
-                    totalProduits:parseFloat(c.total_produits),
-                    fraisLivraison:parseFloat(c.frais_livraison),
-                    totalFinal:parseFloat(c.total_final),
-                    statut:c.statut,
-                    dateCommande:c.date_commande,
-                    historiqueStatut:[]
-                }));
-                localStorage.setItem('deb_commandes',JSON.stringify(formatted));
-            }
-        }
-    } catch(e){ console.warn('API non disponible'); }
-    return JSON.parse(localStorage.getItem('deb_commandes')||'[]');
+        return await window.FirebaseAPI.getCommandes();
+    } catch(e){
+        console.warn('Impossible de charger les commandes:', e.message);
+        return [];
+    }
 }
 
 async function renderAdminCommandes(){
     const commandes = await chargerCommandes();
+    adminCommandesCache = commandes;
     const total=commandes.length;
     const enCours=commandes.filter(c=>['recue','confirmee','preparation'].includes(c.statut)).length;
     const livrees=commandes.filter(c=>c.statut==='livree').length;
@@ -1169,27 +1154,22 @@ const MESSAGES_STATUT={
 };
 
 async function updateStatutCommande(id, newStatut){
-    try {
-        const token=localStorage.getItem('admin_token');
-        if(token){
-            await fetch(`${API}/api/commandes/${id}/statut`,{
-                  method:'PATCH',
-                headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},
-                body:JSON.stringify({statut:newStatut})
-            });
-        }
-    } catch(e){ console.warn('Mise à jour API échouée'); }
-
-    const commandes=JSON.parse(localStorage.getItem('deb_commandes')||'[]');
-    const idx=commandes.findIndex(c=>c.id===id);
-    if(idx===-1)return;
-    const cmd=commandes[idx];
+    const cmd = adminCommandesCache.find(c=>c.id===id);
+    if(!cmd) return;
     const cfg=STATUTS_CONFIG.find(s=>s.val===newStatut);
-    if(!cmd.historiqueStatut)cmd.historiqueStatut=[];
-    cmd.historiqueStatut.push({statut:newStatut,date:new Date().toISOString(),note:`Statut → ${cfg?cfg.label:newStatut}`});
+    const historique = cmd.historiqueStatut || [];
+    historique.push({statut:newStatut,date:new Date().toISOString(),note:`Statut → ${cfg?cfg.label:newStatut}`});
+
+    try {
+        await window.FirebaseAPI.updateCommandeStatut(id, { statut:newStatut, historiqueStatut:historique });
+    } catch(e){
+        console.error('Erreur mise à jour statut:', e.message);
+        alert("⚠️ Impossible de mettre à jour le statut. Vérifiez votre connexion.");
+        return;
+    }
+
     cmd.statut=newStatut;
-    commandes[idx]=cmd;
-    localStorage.setItem('deb_commandes',JSON.stringify(commandes));
+    cmd.historiqueStatut=historique;
 
     if(MESSAGES_STATUT[newStatut]){
         const tel=cmd.client.telephone.replace(/^0/,'212');
@@ -1198,31 +1178,40 @@ async function updateStatutCommande(id, newStatut){
     renderAdminCommandes();
 }
 
-function renderAdminAvis(){
+async function renderAdminAvis(){
     const container=document.getElementById('adminReviewsList');const noReviews=document.getElementById('adminNoReviews');container.innerHTML='';
-    const allKeys=Object.keys(localStorage).filter(k=>k.startsWith('reviews_'));let total=0;
-    allKeys.forEach(key=>{
-        const pName=key.replace('reviews_','');
-        const reviews=JSON.parse(localStorage.getItem(key)||'[]');
-        if(!reviews.length)return;total+=reviews.length;
+    let allReviews=[];
+    try{
+        allReviews = await window.FirebaseAPI.getReviews();
+    }catch(e){
+        console.warn('Impossible de charger les avis (admin):', e.message);
+    }
+    if(allReviews.length===0){container.innerHTML='';noReviews.style.display='block';return;}
+    noReviews.style.display='none';
+
+    const parProduit={};
+    allReviews.forEach(r=>{ (parProduit[r.product]=parProduit[r.product]||[]).push(r); });
+
+    Object.entries(parProduit).forEach(([pName,reviews])=>{
         const sec=document.createElement('div');sec.style.marginBottom='18px';
         sec.innerHTML=`<div style="font-weight:700;font-size:13px;color:#333;background:#f5f5f5;padding:8px 12px;border-radius:8px;margin-bottom:8px;">📦 ${pName} <span style="color:#888;font-weight:400;">(${reviews.length} avis)</span></div>`;
-        reviews.forEach((r,idx)=>{
+        reviews.forEach(r=>{
             const card=document.createElement('div');
             card.style.cssText='display:flex;justify-content:space-between;align-items:flex-start;background:#fff;border:1px solid #eee;border-radius:10px;padding:10px 12px;margin-bottom:6px;gap:10px;';
-            card.innerHTML=`<div style="flex:1;"><div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;"><span style="font-weight:600;font-size:13px;">${r.name}</span><span style="color:#d4af37;font-size:13px;">${'★'.repeat(r.stars)}${'☆'.repeat(5-r.stars)}</span></div><p style="font-size:12px;color:#666;margin:0;">${r.text}</p></div><button onclick="deleteReview('${key}',${idx})" style="background:#fff0f0;border:1px solid #ffcccc;color:#e74c3c;border-radius:8px;padding:6px 12px;cursor:pointer;font-size:12px;font-weight:600;white-space:nowrap;">🗑 Suppr.</button>`;
+            card.innerHTML=`<div style="flex:1;"><div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;"><span style="font-weight:600;font-size:13px;">${r.name}</span><span style="color:#d4af37;font-size:13px;">${'★'.repeat(r.stars)}${'☆'.repeat(5-r.stars)}</span></div><p style="font-size:12px;color:#666;margin:0;">${r.text}</p></div><button onclick="deleteReview('${r.id}')" style="background:#fff0f0;border:1px solid #ffcccc;color:#e74c3c;border-radius:8px;padding:6px 12px;cursor:pointer;font-size:12px;font-weight:600;white-space:nowrap;">🗑 Suppr.</button>`;
             sec.appendChild(card);
         });
         container.appendChild(sec);
     });
-    if(total===0){container.innerHTML='';noReviews.style.display='block';}else noReviews.style.display='none';
 }
-function deleteReview(key,idx){
+async function deleteReview(reviewId){
     if(!confirm('Supprimer cet avis ?'))return;
-    const reviews=JSON.parse(localStorage.getItem(key)||'[]');
-    reviews.splice(idx,1);
-    if(reviews.length===0)localStorage.removeItem(key);else localStorage.setItem(key,JSON.stringify(reviews));
-    renderAdminAvis();renderPublicReviews();
+    try{
+        await window.FirebaseAPI.deleteReview(reviewId);
+        renderAdminAvis();renderPublicReviews();
+    }catch(e){
+        alert("⚠️ Impossible de supprimer cet avis. Vérifiez votre connexion.");
+    }
 }
 function closeAdmin(){document.getElementById('adminModal').style.display='none';adminFiltreStatut='tous';}
 
@@ -1278,6 +1267,88 @@ function searchProducts(query, source){
     if(firstMatch){
         setTimeout(()=>{ firstMatch.scrollIntoView({behavior:'smooth', block:'center'}); }, 60);
     }
+}
+</script>
+
+<script type="module">
+/* ===== MODULE FIREBASE (isolé : si Firebase ne charge pas, le reste du site continue de fonctionner) ===== */
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.17.0/firebase-app.js";
+import {
+    getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/12.17.0/firebase-auth.js";
+import {
+    getFirestore, collection, addDoc, getDocs, doc, updateDoc, deleteDoc,
+    query, orderBy
+} from "https://www.gstatic.com/firebasejs/12.17.0/firebase-firestore.js";
+
+const firebaseConfig = {
+    apiKey: "AIzaSyBPpKmNQQivXemzn5vFPXG9-FjHYSBtEoc",
+    authDomain: "dar-elbahja.firebaseapp.com",
+    projectId: "dar-elbahja",
+    storageBucket: "dar-elbahja.firebasestorage.app",
+    messagingSenderId: "621522488535",
+    appId: "1:621522488535:web:6bcc6357bca37678367492"
+};
+
+const fbApp = initializeApp(firebaseConfig);
+const auth = getAuth(fbApp);
+const db = getFirestore(fbApp);
+let currentAdminUser = null;
+
+onAuthStateChanged(auth, (user)=>{ currentAdminUser = user; });
+
+window.FirebaseAPI = {
+    isReady: true,
+
+    login(email, pwd){ return signInWithEmailAndPassword(auth, email, pwd); },
+    logout(){ return signOut(auth); },
+    getCurrentAdminEmail(){ return currentAdminUser ? currentAdminUser.email : ''; },
+
+    async addCommande(docData){
+        const docRef = await addDoc(collection(db,'commandes'), docData);
+        return docRef.id;
+    },
+    async getCommandes(){
+        const snap = await getDocs(query(collection(db,'commandes'), orderBy('dateCommande','desc')));
+        const commandes=[];
+        snap.forEach(d=>{
+            const c=d.data();
+            commandes.push({
+                id: d.id,
+                ref: 'CMD-' + d.id.slice(-6).toUpperCase(),
+                client: c.client,
+                items: c.items || [],
+                totalProduits: c.totalProduits,
+                fraisLivraison: c.fraisLivraison,
+                totalFinal: c.totalFinal,
+                statut: c.statut,
+                dateCommande: c.dateCommande,
+                historiqueStatut: c.historiqueStatut || []
+            });
+        });
+        return commandes;
+    },
+    async updateCommandeStatut(id, data){
+        return updateDoc(doc(db,'commandes',id), data);
+    },
+
+    async addReview(reviewData){
+        return addDoc(collection(db,'reviews'), reviewData);
+    },
+    async getReviews(){
+        const snap = await getDocs(query(collection(db,'reviews'), orderBy('date','desc')));
+        const reviews=[];
+        snap.forEach(d=>reviews.push({id:d.id,...d.data()}));
+        return reviews;
+    },
+    async deleteReview(reviewId){
+        return deleteDoc(doc(db,'reviews',reviewId));
+    }
+};
+
+// Le module a fini de charger : on peut rafraîchir les avis publics affichés dès l'arrivée
+if(typeof window.renderPublicReviews === 'function'){
+    window.renderPublicReviews();
 }
 </script>
 </body>
