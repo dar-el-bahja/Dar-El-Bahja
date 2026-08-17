@@ -414,6 +414,7 @@ let cart = {};
 let allClients = [];
 let activeCat = 'Tous';
 let isCommercialMode = false;
+let produitsLoaded = false;
 
 function toast(msg){
     const t=document.getElementById('toast');
@@ -440,6 +441,13 @@ function applyAuthState(user){
     switchMainTab('nouvelle');
     renderCatFilter();
     renderCatalog();
+
+    // Le module Firebase (window.FBPro) n'est garanti disponible qu'a partir d'ici :
+    // on ne charge les prix depuis Firestore qu'une seule fois, a ce moment-la.
+    if(!produitsLoaded){
+        produitsLoaded = true;
+        loadProduitsFromFirestore();
+    }
 }
 window.__applyAuthState = applyAuthState;
 
@@ -866,7 +874,15 @@ async function loadProduitsFromFirestore(){
 /* init par defaut : profil public tant que Firebase Auth n'a pas repondu */
 renderCatFilter();
 renderCatalog();
-loadProduitsFromFirestore();
+
+// Filet de securite : si Firebase Auth ne repond jamais (probleme reseau, etc.),
+// on tente quand meme le chargement des prix apres un court delai.
+setTimeout(()=>{
+    if(!produitsLoaded){
+        produitsLoaded = true;
+        loadProduitsFromFirestore();
+    }
+}, 4000);
 </script>
 
 </body>
