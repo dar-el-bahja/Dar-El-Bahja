@@ -1,0 +1,427 @@
+import React, { useState, useRef } from "react";
+import {
+  LogIn, Send, Users, Plus, Trash2, Paperclip, Mic, FileText,
+  Image as ImageIcon, MessageCircle, LogOut, CheckSquare, Square,
+  Phone, User, X, AlertTriangle, Search
+} from "lucide-react";
+
+// ---- Palette ----
+const C = {
+  ink: "#12201E",
+  teal: "#0F3D3E",
+  tealDark: "#0A2B2C",
+  gold: "#C9A227",
+  goldSoft: "#E4C97A",
+  cream: "#F6F1E6",
+  rose: "#C1666B",
+  line: "rgba(246,241,230,0.14)",
+};
+
+const seedClients = [
+  { id: 1, nom: "Rachid El Amrani", tel: "+212661234567" },
+  { id: 2, nom: "Sanae Bouzid", tel: "+212677889900" },
+  { id: 3, nom: "Youssef Cherkaoui", tel: "+212612345678" },
+];
+
+function Logo() {
+  return (
+    <div className="flex items-center gap-3">
+      <div
+        className="flex items-center justify-center rounded-full"
+        style={{ width: 42, height: 42, border: `1.5px solid ${C.gold}` }}
+      >
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+          <path d="M12 2 L21 8 V22 H3 V8 Z" stroke={C.gold} strokeWidth="1.4" fill="none" />
+          <path d="M9 22 V14 H15 V22" stroke={C.gold} strokeWidth="1.4" fill="none" />
+          <circle cx="12" cy="10" r="1.6" fill={C.gold} />
+        </svg>
+      </div>
+      <div className="leading-tight">
+        <div style={{ fontFamily: "Georgia, serif", color: C.cream, fontSize: 18, letterSpacing: 1 }}>
+          Dar El Bahja
+        </div>
+        <div style={{ color: C.goldSoft, fontSize: 10, letterSpacing: 3 }}>MESSAGERIE CLIENTS</div>
+      </div>
+    </div>
+  );
+}
+
+function LoginScreen({ onLogin }) {
+  const [email, setEmail] = useState("");
+  const [pass, setPass] = useState("");
+  const [error, setError] = useState("");
+
+  const submit = (e) => {
+    e.preventDefault();
+    if (email.trim() === "darelbahja1@gmail.com" && pass === "far123") {
+      setError("");
+      onLogin();
+    } else {
+      setError("Email ou mot de passe incorrect.");
+    }
+  };
+
+  return (
+    <div
+      className="min-h-screen flex items-center justify-center p-6"
+      style={{ background: `radial-gradient(circle at 20% 10%, ${C.tealDark}, ${C.ink} 70%)` }}
+    >
+      <form
+        onSubmit={submit}
+        className="w-full max-w-sm rounded-2xl p-8"
+        style={{ background: C.teal, border: `1px solid ${C.line}` }}
+      >
+        <div className="flex justify-center mb-8">
+          <Logo />
+        </div>
+        <h1 style={{ color: C.cream, fontFamily: "Georgia, serif" }} className="text-xl mb-1 text-center">
+          Connexion
+        </h1>
+        <p style={{ color: "rgba(246,241,230,0.55)" }} className="text-xs text-center mb-6">
+          Accédez à votre espace de messagerie
+        </p>
+
+        <label style={{ color: C.goldSoft }} className="text-xs uppercase tracking-wide">Email</label>
+        <input
+          type="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          placeholder="votre@email.com"
+          className="w-full mt-1 mb-4 px-3 py-2 rounded-lg outline-none text-sm"
+          style={{ background: C.ink, color: C.cream, border: `1px solid ${C.line}` }}
+        />
+
+        <label style={{ color: C.goldSoft }} className="text-xs uppercase tracking-wide">Mot de passe</label>
+        <input
+          type="password"
+          value={pass}
+          onChange={(e) => setPass(e.target.value)}
+          placeholder="••••••••"
+          className="w-full mt-1 mb-2 px-3 py-2 rounded-lg outline-none text-sm"
+          style={{ background: C.ink, color: C.cream, border: `1px solid ${C.line}` }}
+        />
+
+        {error && (
+          <div className="text-xs mb-3" style={{ color: C.rose }}>{error}</div>
+        )}
+
+        <button
+          type="submit"
+          className="w-full mt-4 flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-medium transition"
+          style={{ background: C.gold, color: C.ink }}
+        >
+          <LogIn size={16} /> Se connecter
+        </button>
+      </form>
+    </div>
+  );
+}
+
+function Sidebar({ tab, setTab, onLogout }) {
+  const item = (id, label, Icon) => (
+    <button
+      onClick={() => setTab(id)}
+      className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm transition"
+      style={{
+        background: tab === id ? "rgba(201,162,39,0.12)" : "transparent",
+        color: tab === id ? C.goldSoft : "rgba(246,241,230,0.7)",
+        borderLeft: tab === id ? `2px solid ${C.gold}` : "2px solid transparent",
+      }}
+    >
+      <Icon size={16} /> {label}
+    </button>
+  );
+
+  return (
+    <div
+      className="w-60 shrink-0 h-screen sticky top-0 flex flex-col justify-between py-6 px-3"
+      style={{ background: C.tealDark, borderRight: `1px solid ${C.line}` }}
+    >
+      <div>
+        <div className="px-3 mb-8"><Logo /></div>
+        <div className="flex flex-col gap-1">
+          {item("send", "Envoyer un message", MessageCircle)}
+          {item("clients", "Clients", Users)}
+        </div>
+      </div>
+      <button
+        onClick={onLogout}
+        className="mx-3 flex items-center gap-2 px-4 py-2 rounded-lg text-xs"
+        style={{ color: "rgba(246,241,230,0.5)", border: `1px solid ${C.line}` }}
+      >
+        <LogOut size={14} /> Déconnexion
+      </button>
+    </div>
+  );
+}
+
+function FileSlot({ label, icon: Icon, file, onPick, accept }) {
+  const ref = useRef(null);
+  return (
+    <div>
+      <input ref={ref} type="file" accept={accept} className="hidden"
+        onChange={(e) => onPick(e.target.files?.[0] || null)} />
+      <button
+        onClick={() => ref.current?.click()}
+        className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm text-left transition"
+        style={{ background: C.ink, border: `1px dashed ${file ? C.gold : C.line}`, color: file ? C.goldSoft : "rgba(246,241,230,0.6)" }}
+      >
+        <Icon size={16} />
+        <span className="flex-1 truncate">{file ? file.name : label}</span>
+        {file && (
+          <X size={14} onClick={(e) => { e.stopPropagation(); onPick(null); }} />
+        )}
+      </button>
+    </div>
+  );
+}
+
+function SendTab({ clients }) {
+  const [text, setText] = useState("");
+  const [audio, setAudio] = useState(null);
+  const [pdf, setPdf] = useState(null);
+  const [image, setImage] = useState(null);
+  const [selected, setSelected] = useState(() => new Set(clients.map((c) => c.id)));
+  const [query, setQuery] = useState("");
+  const [sent, setSent] = useState(false);
+
+  const filtered = clients.filter((c) =>
+    c.nom.toLowerCase().includes(query.toLowerCase()) || c.tel.includes(query)
+  );
+
+  const toggle = (id) => {
+    const next = new Set(selected);
+    next.has(id) ? next.delete(id) : next.add(id);
+    setSelected(next);
+  };
+
+  const toggleAll = () => {
+    if (selected.size === filtered.length) setSelected(new Set());
+    else setSelected(new Set(filtered.map((c) => c.id)));
+  };
+
+  const hasFiles = audio || pdf || image;
+
+  const handleSend = () => {
+    const chosen = clients.filter((c) => selected.has(c.id));
+    if (chosen.length === 0 || (!text.trim() && !hasFiles)) return;
+    chosen.forEach((c) => {
+      const phone = c.tel.replace(/[^\d]/g, "");
+      const url = `https://wa.me/${phone}?text=${encodeURIComponent(text)}`;
+      window.open(url, "_blank");
+    });
+    setSent(true);
+    setTimeout(() => setSent(false), 4000);
+  };
+
+  return (
+    <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
+      {/* Composer */}
+      <div className="lg:col-span-3 rounded-2xl p-6" style={{ background: C.teal, border: `1px solid ${C.line}` }}>
+        <h2 style={{ color: C.cream, fontFamily: "Georgia, serif" }} className="text-lg mb-1">Composer le message</h2>
+        <p style={{ color: "rgba(246,241,230,0.5)" }} className="text-xs mb-5">
+          Rédigez votre texte et joignez éventuellement un audio, un PDF ou une image.
+        </p>
+
+        <textarea
+          value={text}
+          onChange={(e) => setText(e.target.value)}
+          rows={6}
+          placeholder="Écrivez votre message ici..."
+          className="w-full px-4 py-3 rounded-lg text-sm outline-none resize-none mb-4"
+          style={{ background: C.ink, color: C.cream, border: `1px solid ${C.line}` }}
+        />
+
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-5">
+          <FileSlot label="Ajouter un audio" icon={Mic} file={audio} onPick={setAudio} accept="audio/*" />
+          <FileSlot label="Ajouter un PDF" icon={FileText} file={pdf} onPick={setPdf} accept="application/pdf" />
+          <FileSlot label="Ajouter une image" icon={ImageIcon} file={image} onPick={setImage} accept="image/*" />
+        </div>
+
+        {hasFiles && (
+          <div
+            className="flex items-start gap-2 text-xs px-3 py-2.5 rounded-lg mb-5"
+            style={{ background: "rgba(193,102,107,0.1)", color: C.rose, border: `1px solid rgba(193,102,107,0.3)` }}
+          >
+            <AlertTriangle size={14} className="mt-0.5 shrink-0" />
+            <span>
+              WhatsApp ne permet pas de joindre un fichier automatiquement via un lien. Le texte sera envoyé
+              directement ; les fichiers joints devront être envoyés manuellement dans la conversation ouverte,
+              ou nécessitent une intégration WhatsApp Business API (voir note en bas de page).
+            </span>
+          </div>
+        )}
+
+        <button
+          onClick={handleSend}
+          disabled={selected.size === 0 || (!text.trim() && !hasFiles)}
+          className="w-full flex items-center justify-center gap-2 py-3 rounded-lg text-sm font-medium transition disabled:opacity-40"
+          style={{ background: C.gold, color: C.ink }}
+        >
+          <Send size={16} /> Envoyer à {selected.size} client{selected.size > 1 ? "s" : ""}
+        </button>
+
+        {sent && (
+          <div className="mt-3 text-xs text-center" style={{ color: C.goldSoft }}>
+            WhatsApp Web s'est ouvert dans un nouvel onglet pour chaque client sélectionné.
+          </div>
+        )}
+      </div>
+
+      {/* Recipients */}
+      <div className="lg:col-span-2 rounded-2xl p-6" style={{ background: C.teal, border: `1px solid ${C.line}` }}>
+        <div className="flex items-center justify-between mb-4">
+          <h3 style={{ color: C.cream, fontFamily: "Georgia, serif" }} className="text-base">Destinataires</h3>
+          <button onClick={toggleAll} className="text-xs" style={{ color: C.goldSoft }}>
+            {selected.size === filtered.length ? "Tout désélectionner" : "Tout sélectionner"}
+          </button>
+        </div>
+
+        <div className="relative mb-3">
+          <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: "rgba(246,241,230,0.4)" }} />
+          <input
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Rechercher un client..."
+            className="w-full pl-9 pr-3 py-2 rounded-lg text-sm outline-none"
+            style={{ background: C.ink, color: C.cream, border: `1px solid ${C.line}` }}
+          />
+        </div>
+
+        <div className="flex flex-col gap-1 max-h-80 overflow-y-auto pr-1">
+          {filtered.map((c) => (
+            <button
+              key={c.id}
+              onClick={() => toggle(c.id)}
+              className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-left"
+              style={{ background: selected.has(c.id) ? "rgba(201,162,39,0.1)" : "transparent" }}
+            >
+              {selected.has(c.id) ? <CheckSquare size={16} color={C.gold} /> : <Square size={16} color="rgba(246,241,230,0.35)" />}
+              <div className="min-w-0">
+                <div style={{ color: C.cream }} className="text-sm truncate">{c.nom}</div>
+                <div style={{ color: "rgba(246,241,230,0.45)" }} className="text-xs">{c.tel}</div>
+              </div>
+            </button>
+          ))}
+          {filtered.length === 0 && (
+            <div style={{ color: "rgba(246,241,230,0.4)" }} className="text-xs text-center py-6">Aucun client trouvé.</div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function ClientsTab({ clients, setClients }) {
+  const [nom, setNom] = useState("");
+  const [tel, setTel] = useState("");
+  const [error, setError] = useState("");
+
+  const add = (e) => {
+    e.preventDefault();
+    if (!nom.trim() || !tel.trim()) {
+      setError("Nom et numéro requis.");
+      return;
+    }
+    if (!/^\+?\d{8,15}$/.test(tel.replace(/\s/g, ""))) {
+      setError("Numéro invalide. Utilisez le format international, ex: +212612345678");
+      return;
+    }
+    setClients([...clients, { id: Date.now(), nom: nom.trim(), tel: tel.trim() }]);
+    setNom("");
+    setTel("");
+    setError("");
+  };
+
+  const remove = (id) => setClients(clients.filter((c) => c.id !== id));
+
+  return (
+    <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
+      <div className="lg:col-span-2 rounded-2xl p-6 h-fit" style={{ background: C.teal, border: `1px solid ${C.line}` }}>
+        <h2 style={{ color: C.cream, fontFamily: "Georgia, serif" }} className="text-lg mb-4">Ajouter un client</h2>
+        <form onSubmit={add} className="flex flex-col gap-3">
+          <div>
+            <label style={{ color: C.goldSoft }} className="text-xs uppercase tracking-wide">Nom complet</label>
+            <div className="relative mt-1">
+              <User size={14} className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: "rgba(246,241,230,0.4)" }} />
+              <input value={nom} onChange={(e) => setNom(e.target.value)} placeholder="Ex: Fatima Zahra"
+                className="w-full pl-9 pr-3 py-2 rounded-lg text-sm outline-none"
+                style={{ background: C.ink, color: C.cream, border: `1px solid ${C.line}` }} />
+            </div>
+          </div>
+          <div>
+            <label style={{ color: C.goldSoft }} className="text-xs uppercase tracking-wide">Numéro WhatsApp</label>
+            <div className="relative mt-1">
+              <Phone size={14} className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: "rgba(246,241,230,0.4)" }} />
+              <input value={tel} onChange={(e) => setTel(e.target.value)} placeholder="+212612345678"
+                className="w-full pl-9 pr-3 py-2 rounded-lg text-sm outline-none"
+                style={{ background: C.ink, color: C.cream, border: `1px solid ${C.line}` }} />
+            </div>
+          </div>
+          {error && <div className="text-xs" style={{ color: C.rose }}>{error}</div>}
+          <button type="submit" className="mt-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-medium"
+            style={{ background: C.gold, color: C.ink }}>
+            <Plus size={16} /> Ajouter le client
+          </button>
+        </form>
+      </div>
+
+      <div className="lg:col-span-3 rounded-2xl p-6" style={{ background: C.teal, border: `1px solid ${C.line}` }}>
+        <div className="flex items-center justify-between mb-4">
+          <h2 style={{ color: C.cream, fontFamily: "Georgia, serif" }} className="text-lg">
+            Base de clients <span style={{ color: C.goldSoft }} className="text-sm">({clients.length})</span>
+          </h2>
+        </div>
+        <div className="flex flex-col gap-1 max-h-[26rem] overflow-y-auto pr-1">
+          {clients.map((c) => (
+            <div key={c.id} className="flex items-center justify-between px-4 py-3 rounded-lg" style={{ background: C.ink }}>
+              <div>
+                <div style={{ color: C.cream }} className="text-sm">{c.nom}</div>
+                <div style={{ color: "rgba(246,241,230,0.45)" }} className="text-xs">{c.tel}</div>
+              </div>
+              <button onClick={() => remove(c.id)} style={{ color: "rgba(193,102,107,0.8)" }}>
+                <Trash2 size={16} />
+              </button>
+            </div>
+          ))}
+          {clients.length === 0 && (
+            <div style={{ color: "rgba(246,241,230,0.4)" }} className="text-xs text-center py-8">
+              Aucun client enregistré pour le moment.
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default function App() {
+  const [loggedIn, setLoggedIn] = useState(false);
+  const [tab, setTab] = useState("send");
+  const [clients, setClients] = useState(seedClients);
+
+  if (!loggedIn) return <LoginScreen onLogin={() => setLoggedIn(true)} />;
+
+  return (
+    <div className="min-h-screen flex" style={{ background: C.ink }}>
+      <Sidebar tab={tab} setTab={setTab} onLogout={() => setLoggedIn(false)} />
+      <div className="flex-1 p-8">
+        <div className="max-w-5xl mx-auto">
+          {tab === "send" ? <SendTab clients={clients} /> : <ClientsTab clients={clients} setClients={setClients} />}
+
+          <div
+            className="mt-8 text-xs px-4 py-3 rounded-lg"
+            style={{ color: "rgba(246,241,230,0.45)", border: `1px solid ${C.line}` }}
+          >
+            <strong style={{ color: C.goldSoft }}>À savoir : </strong>
+            cette interface est un prototype. Elle ouvre WhatsApp Web/App pour chaque client avec le texte
+            pré-rempli, ce qui fonctionne sans backend. Pour un envoi réellement automatique et groupé, avec
+            fichiers joints (audio, PDF, images) sans intervention manuelle, il faut connecter une vraie API
+            WhatsApp Business (Meta Cloud API, Twilio ou 360dialog) et une base de données côté serveur — cela
+            demande un backend séparé que je peux vous aider à concevoir si vous le souhaitez.
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}

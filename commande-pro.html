@@ -116,6 +116,65 @@ input:focus,select:focus,textarea:focus{border-color:var(--gold);}
 .header-logo{width:34px;height:34px;object-fit:contain;border-radius:8px;background:#fff;padding:3px;flex-shrink:0;}
 .brand-wrap{display:flex;align-items:center;gap:10px;}
 
+/* ===== MESSAGERIE CLIENTS ===== */
+.msg-client-select{display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid #eee;border-radius:10px;margin-top:6px;cursor:pointer;font-size:13px;}
+.msg-client-select:hover{border-color:var(--gold);}
+.msg-client-select.selected{background:#fffdf0;border-color:var(--gold);}
+.msg-client-select .chk{width:18px;height:18px;border:2px solid #ccc;border-radius:5px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:12px;color:#fff;}
+.msg-client-select.selected .chk{background:var(--gold);border-color:var(--gold);}
+.msg-toprow{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;}
+.link-btn{background:none;border:none;color:var(--gold);font-size:12px;font-weight:600;cursor:pointer;}
+.file-note{display:flex;gap:8px;font-size:12px;padding:10px 12px;border-radius:10px;background:#fdf2f2;border:1px solid #f3d3d3;color:#a33;margin:12px 0;}
+.type-badge{display:inline-block;font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px;margin-left:6px;white-space:nowrap;}
+.type-badge.pro{background:#e8f0fe;color:#1a56db;}
+.type-badge.particulier{background:#fff0e0;color:#b35c00;}
+.type-filter{display:flex;gap:6px;margin-bottom:10px;}
+.type-filter .cat-chip.tf-pro.active{background:#1a56db;color:#fff;}
+.type-filter .cat-chip.tf-particulier.active{background:#b35c00;color:#fff;}
+.type-filter .cat-chip.tf-today{margin-left:auto;}
+.type-filter .cat-chip.tf-today.active{background:var(--success);color:#fff;}
+.type-badge.new{background:#e7f7ec;color:#1e7e3a;}
+
+/* ===== ECRAN DE BIENVENUE ===== */
+.welcome-splash{
+    text-align:center;
+    padding:56px 20px 48px;
+    animation: welcomeFade 0.4s ease both;
+}
+.welcome-splash .w-ornament{
+    font-size:20px;
+    color:var(--gold);
+    letter-spacing:10px;
+    margin-bottom:18px;
+    opacity:.85;
+}
+.welcome-splash .w-arabic{
+    font-family:'Poppins',sans-serif;
+    font-size:34px;
+    font-weight:800;
+    direction:rtl;
+    background:linear-gradient(135deg, var(--gold-light), var(--gold) 55%, #a9821f);
+    -webkit-background-clip:text;
+    background-clip:text;
+    -webkit-text-fill-color:transparent;
+    line-height:1.5;
+    margin-bottom:10px;
+}
+.welcome-splash .w-divider{
+    width:70px;height:2px;margin:14px auto;
+    background:linear-gradient(90deg, transparent, var(--gold), transparent);
+}
+.welcome-splash .w-sub{
+    font-size:13px;
+    color:#888;
+    letter-spacing:1.5px;
+    text-transform:uppercase;
+}
+@keyframes welcomeFade{
+    from{ opacity:0; transform:translateY(10px); }
+    to{ opacity:1; transform:translateY(0); }
+}
+
 /* ===== MOBILE ===== */
 @media(max-width:600px){
     header{padding:12px 14px;}
@@ -157,6 +216,7 @@ input:focus,select:focus,textarea:focus{border-color:var(--gold);}
         <div class="tab active" data-tab="nouvelle" onclick="switchMainTab('nouvelle')">➕ Nouvelle commande</div>
         <div class="tab" data-tab="commandes" onclick="switchMainTab('commandes')">📦 Mes commandes</div>
         <div class="tab" data-tab="clients" onclick="switchMainTab('clients')">👥 Mes clients</div>
+        <div class="tab" data-tab="message" onclick="switchMainTab('message')">💬 Message</div>
         <div class="tab" data-tab="prix" onclick="switchMainTab('prix')">💰 Prix</div>
         <div class="tab" id="tabAdminBtn" data-tab="admin" onclick="switchMainTab('admin')" style="display:none;">⚙️ Admin</div>
     </div>
@@ -200,6 +260,39 @@ input:focus,select:focus,textarea:focus{border-color:var(--gold);}
             <h3>Mes clients</h3>
             <input type="text" id="clientListSearch" placeholder="Rechercher..." oninput="renderMyClients()">
             <div id="myClientsList"><p class="empty-state">Chargement...</p></div>
+        </div>
+    </div>
+
+    <!-- TAB: MESSAGE (envoi WhatsApp aux clients enregistres) -->
+    <div class="tabpanel" id="panel-message">
+        <div class="card">
+            <h3>💬 Envoyer un message</h3>
+            <p style="font-size:12px;color:#888;margin-bottom:10px;">Rédigez votre message et choisissez les clients enregistrés à qui l'envoyer.</p>
+            <label class="fl">Message</label>
+            <textarea id="msgText" rows="5" placeholder="Écrivez votre message ici..."></textarea>
+
+            <label class="fl">Fichier joint (optionnel)</label>
+            <input type="file" id="msgFile" accept="image/*,application/pdf,video/*" onchange="onMsgFileChange()">
+            <div id="msgFileInfo" style="font-size:12px;color:#888;margin-top:6px;"></div>
+
+            <div id="serverStatusBox" class="file-note" style="display:none;"></div>
+
+            <button class="btn-primary" id="msgSendBtn" onclick="envoyerMessageClients()">📤 Envoyer aux clients sélectionnés (<span id="msgSelCount">0</span>)</button>
+            <div id="msgSendProgress" style="font-size:12px;color:#888;margin-top:8px;text-align:center;"></div>
+        </div>
+        <div class="card">
+            <div class="msg-toprow">
+                <h3 style="margin:0;">Destinataires</h3>
+                <button class="link-btn" onclick="toggleAllMessageClients()">Tout sélectionner / désélectionner</button>
+            </div>
+            <div class="type-filter">
+                <div class="cat-chip tf-tous active" id="tf-tous" onclick="setMessageType('tous')">Tous</div>
+                <div class="cat-chip tf-pro" id="tf-pro" onclick="setMessageType('pro')">🏢 Pro</div>
+                <div class="cat-chip tf-particulier" id="tf-particulier" onclick="setMessageType('particulier')">👤 Particuliers</div>
+                <div class="cat-chip tf-today" id="tf-today" onclick="toggleTodayFilter()">🆕 Nouveaux du jour</div>
+            </div>
+            <input type="text" id="msgClientSearch" placeholder="Rechercher un client..." oninput="renderMessageClientList()">
+            <div id="messageClientList"><p class="empty-state">Chargement...</p></div>
         </div>
     </div>
 
@@ -262,6 +355,11 @@ input:focus,select:focus,textarea:focus{border-color:var(--gold);}
     <div class="modal-box">
         <button class="modal-close" onclick="closeAllModals()">×</button>
         <h3>Nouveau client</h3>
+        <label class="fl">Type de client</label>
+        <select id="ncType">
+            <option value="pro">🏢 Professionnel</option>
+            <option value="particulier">👤 Particulier</option>
+        </select>
         <label class="fl">Nom / Établissement</label>
         <input type="text" id="ncNom" placeholder="Nom du client ou du commerce">
         <label class="fl">Téléphone</label>
@@ -321,7 +419,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/12.17.0/firebase-auth.js";
 import {
     getFirestore, collection, addDoc, getDocs, doc, updateDoc, setDoc, writeBatch,
-    query, orderBy
+    query, orderBy, onSnapshot
 } from "https://www.gstatic.com/firebasejs/12.17.0/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -381,10 +479,20 @@ window.FBPro = {
         const snap = await getDocs(collection(db,'commerciaux'));
         const out=[]; snap.forEach(d=>out.push({id:d.id,...d.data()})); return out;
     },
-    // ===== Produits (catalogue avec prix modifiables en ligne) =====
+    // ===== Produits (catalogue avec prix synchronises en temps reel) =====
     async getProduits(){
         const snap = await getDocs(collection(db,'produits_pro'));
         const out={}; snap.forEach(d=>out[d.id]=d.data()); return out;
+    },
+    listenProduits(callback){
+        // Ecoute en direct : chaque modif de prix (par n'importe quel commercial) est
+        // repercutee instantanement sur tous les navigateurs ouverts, sans rechargement.
+        return onSnapshot(collection(db,'produits_pro'), (snap)=>{
+            const out={}; snap.forEach(d=>out[d.id]=d.data());
+            callback(out);
+        }, (err)=>{
+            console.warn('Ecoute Firestore interrompue:', err);
+        });
     },
     async seedProduits(defaultList){
         // Ecrit tous les produits par defaut dans Firestore, uniquement si la collection est vide
@@ -398,6 +506,11 @@ window.FBPro = {
         return setDoc(doc(db,'produits_pro',id), {prix}, {merge:true});
     }
 };
+
+// Signale que le module Firebase est pret des qu'il est charge,
+// independamment du temps que prend la resolution de l'etat de connexion.
+window.__firebaseModuleReady = true;
+window.__onFirebaseModuleReady && window.__onFirebaseModuleReady();
 window.getCurrentUserEmail = ()=> currentUser ? currentUser.email : null;
 window.isAdminUser = ()=> currentUser ? ADMIN_EMAILS.includes(currentUser.email) : false;
 </script>
@@ -414,7 +527,31 @@ let cart = {};
 let allClients = [];
 let activeCat = 'Tous';
 let isCommercialMode = false;
-let produitsLoaded = false;
+let firstSnapshotReceived = false;
+let produitsListenerStarted = false;
+
+/* ===== Messagerie clients : selection multi-clients + filtre par type + filtre du jour ===== */
+let messageSelectedIds = new Set();
+let messageActiveType = 'tous';
+let messageOnlyToday = false;
+
+function clientTypeOf(c){
+    // Clients crees avant l'ajout du champ typeClient sont consideres "pro" par defaut
+    return c.typeClient === 'particulier' ? 'particulier' : 'pro';
+}
+function typeBadge(c){
+    const t = clientTypeOf(c);
+    return t==='particulier' ? '<span class="type-badge particulier">👤 Particulier</span>' : '<span class="type-badge pro">🏢 Pro</span>';
+}
+function isCreeAujourdhui(c){
+    if(!c.dateCreation) return false;
+    const d = new Date(c.dateCreation);
+    const now = new Date();
+    return d.getFullYear()===now.getFullYear() && d.getMonth()===now.getMonth() && d.getDate()===now.getDate();
+}
+function newBadge(c){
+    return isCreeAujourdhui(c) ? '<span class="type-badge new">🆕 Nouveau</span>' : '';
+}
 
 function toast(msg){
     const t=document.getElementById('toast');
@@ -439,14 +576,9 @@ function applyAuthState(user){
     document.getElementById('catalogTitle').innerText = isCommercialMode ? '2. Catalogue' : 'Catalogue';
 
     switchMainTab('nouvelle');
-    renderCatFilter();
-    renderCatalog();
-
-    // Le module Firebase (window.FBPro) n'est garanti disponible qu'a partir d'ici :
-    // on ne charge les prix depuis Firestore qu'une seule fois, a ce moment-la.
-    if(!produitsLoaded){
-        produitsLoaded = true;
-        loadProduitsFromFirestore();
+    if(firstSnapshotReceived){
+        renderCatFilter();
+        renderCatalog();
     }
 }
 window.__applyAuthState = applyAuthState;
@@ -457,6 +589,7 @@ function switchMainTab(tab){
     document.getElementById('panel-'+tab).classList.add('active');
     if(tab==='commandes') loadMyOrders();
     if(tab==='clients') loadMyClients();
+    if(tab==='message') loadMessagePanel();
     if(tab==='prix'){ renderPriceCatFilter(); renderPriceEditor(); }
     if(tab==='admin') loadAdminPanel();
 }
@@ -591,7 +724,7 @@ async function searchClientLive(q){
     const ql = q.toLowerCase();
     const matches = allClients.filter(c=> (c.nom||'').toLowerCase().includes(ql) || (c.telephone||'').includes(q)).slice(0,6);
     box.innerHTML = matches.map(c=>`<div class="client-result" onclick='selectClient(${JSON.stringify(c).replace(/'/g,"&apos;")})'>
-        <span><span class="cname">${c.nom}</span><br><span class="cphone">${c.telephone||''} — ${c.ville||''}</span></span>
+        <span><span class="cname">${c.nom}</span>${typeBadge(c)}<br><span class="cphone">${c.telephone||''} — ${c.ville||''}</span></span>
         <span>→</span>
     </div>`).join('') || '<p style="font-size:12px;color:#999;padding:6px 0;">Aucun résultat. Créez un nouveau client.</p>';
 }
@@ -610,8 +743,9 @@ async function createClient(){
     const tel = document.getElementById('ncTel').value.trim();
     const ville = document.getElementById('ncVille').value.trim();
     const adresse = document.getElementById('ncAdresse').value.trim();
+    const typeClient = document.getElementById('ncType').value;
     if(!nom || !tel){ alert('Nom et téléphone requis.'); return; }
-    const data = { nom, telephone:tel, ville, adresse, creePar: window.getCurrentUserEmail(), dateCreation: new Date().toISOString() };
+    const data = { nom, telephone:tel, ville, adresse, typeClient, creePar: window.getCurrentUserEmail(), dateCreation: new Date().toISOString() };
     try{
         const id = await window.FBPro.addClient(data);
         const c = {id, ...data};
@@ -621,8 +755,178 @@ async function createClient(){
         toast('✅ Client créé');
         document.getElementById('ncNom').value='';document.getElementById('ncTel').value='';
         document.getElementById('ncVille').value='';document.getElementById('ncAdresse').value='';
+        document.getElementById('ncType').value='pro';
     }catch(e){ alert("Erreur lors de la création du client."); console.error(e); }
 }
+
+/* ===== MESSAGERIE : envoi WhatsApp aux clients enregistres ===== */
+async function loadMessagePanel(){
+    const box = document.getElementById('messageClientList');
+    box.innerHTML = '<p class="empty-state">Chargement...</p>';
+    await loadAllClientsIfNeeded();
+    // Par defaut, tous les clients sont selectionnes
+    if(messageSelectedIds.size===0){ allClients.forEach(c=>messageSelectedIds.add(c.id)); }
+    renderMessageClientList();
+}
+function setMessageType(type){
+    messageActiveType = type;
+    document.querySelectorAll('.type-filter .cat-chip').forEach(el=>{
+        if(!el.classList.contains('tf-today')) el.classList.remove('active');
+    });
+    document.getElementById('tf-'+type).classList.add('active');
+    renderMessageClientList();
+}
+function toggleTodayFilter(){
+    messageOnlyToday = !messageOnlyToday;
+    document.getElementById('tf-today').classList.toggle('active', messageOnlyToday);
+    if(messageOnlyToday){
+        // Selectionne automatiquement uniquement les nouveaux clients du jour
+        // (selon le filtre pro/particulier/recherche en cours), pour un envoi rapide.
+        const filtered = getFilteredMessageClients();
+        messageSelectedIds = new Set(filtered.map(c=>c.id));
+    }
+    renderMessageClientList();
+}
+function getFilteredMessageClients(){
+    const q = (document.getElementById('msgClientSearch').value||'').toLowerCase();
+    return allClients.filter(c=>{
+        const matchType = messageActiveType==='tous' || clientTypeOf(c)===messageActiveType;
+        const matchQ = (c.nom||'').toLowerCase().includes(q) || (c.telephone||'').includes(q);
+        const matchToday = !messageOnlyToday || isCreeAujourdhui(c);
+        return matchType && matchQ && matchToday;
+    });
+}
+function renderMessageClientList(){
+    const box = document.getElementById('messageClientList');
+    const filtered = getFilteredMessageClients();
+    if(filtered.length===0){
+        box.innerHTML = messageOnlyToday
+            ? '<p class="empty-state">Aucun nouveau client enregistré aujourd\'hui.</p>'
+            : (allClients.length===0
+                ? '<p class="empty-state">Aucun client enregistré. Ajoutez-en depuis "Nouvelle commande".</p>'
+                : '<p class="empty-state">Aucun client trouvé pour ce filtre.</p>');
+        updateMsgSelCount();
+        return;
+    }
+    box.innerHTML = filtered.map(c=>{
+        const sel = messageSelectedIds.has(c.id);
+        return `<div class="msg-client-select ${sel?'selected':''}" onclick="toggleMessageClient('${c.id}')">
+            <span class="chk">${sel?'✓':''}</span>
+            <span><span class="cname">${c.nom}</span>${typeBadge(c)}${newBadge(c)}<br><span class="cphone">${c.telephone||''} — ${c.ville||''}</span></span>
+        </div>`;
+    }).join('');
+    updateMsgSelCount();
+}
+function toggleMessageClient(id){
+    messageSelectedIds.has(id) ? messageSelectedIds.delete(id) : messageSelectedIds.add(id);
+    renderMessageClientList();
+}
+function toggleAllMessageClients(){
+    // N'agit que sur les clients actuellement visibles (selon le filtre de type + recherche)
+    const filtered = getFilteredMessageClients();
+    const allVisibleSelected = filtered.length>0 && filtered.every(c=>messageSelectedIds.has(c.id));
+    if(allVisibleSelected){ filtered.forEach(c=>messageSelectedIds.delete(c.id)); }
+    else { filtered.forEach(c=>messageSelectedIds.add(c.id)); }
+    renderMessageClientList();
+}
+function updateMsgSelCount(){
+    const el = document.getElementById('msgSelCount');
+    if(el) el.innerText = messageSelectedIds.size;
+}
+
+/* ===== Envoi de fichier via le serveur local (server.js) ===== */
+const LOCAL_SEND_SERVER = "http://localhost:3737";
+let msgFileHandle = null;
+
+function onMsgFileChange(){
+    const input = document.getElementById('msgFile');
+    const info = document.getElementById('msgFileInfo');
+    msgFileHandle = input.files[0] || null;
+    if(msgFileHandle){
+        const sizeMo = (msgFileHandle.size/1024/1024).toFixed(1);
+        info.innerHTML = `📎 ${msgFileHandle.name} (${sizeMo} Mo) — nécessite le serveur local en marche.`;
+        checkLocalServer();
+    } else {
+        info.innerHTML = '';
+        document.getElementById('serverStatusBox').style.display = 'none';
+    }
+}
+
+async function checkLocalServer(){
+    const box = document.getElementById('serverStatusBox');
+    box.style.display = 'flex';
+    box.innerHTML = '⏳ Vérification du serveur local...';
+    try{
+        const r = await fetch(LOCAL_SEND_SERVER + '/status', { signal: AbortSignal.timeout(2500) });
+        const data = await r.json();
+        if(data.connected){
+            box.style.background = '#e7f7ec'; box.style.borderColor = '#b6e3c4'; box.style.color = '#1e7e3a';
+            box.innerHTML = '✅ Serveur local connecté à WhatsApp. Prêt à envoyer le fichier.';
+        } else {
+            box.style.background = '#fff3cd'; box.style.borderColor = '#ffe3a3'; box.style.color = '#8a6415';
+            box.innerHTML = '⚠️ Serveur local détecté mais pas encore connecté à WhatsApp (scannez le QR dans le terminal).';
+        }
+    }catch(e){
+        box.style.background = '#fdf2f2'; box.style.borderColor = '#f3d3d3'; box.style.color = '#a33';
+        box.innerHTML = `⚠️ Serveur local introuvable sur ${LOCAL_SEND_SERVER}. Lancez <code>node server.js</code> dans le dossier d'envoi sur cet ordinateur, puis réessayez.`;
+    }
+}
+
+async function envoyerMessageClients(){
+    const text = document.getElementById('msgText').value.trim();
+    const chosen = allClients.filter(c=>messageSelectedIds.has(c.id) && c.telephone);
+    const progress = document.getElementById('msgSendProgress');
+
+    if(!text && !msgFileHandle){ alert("Écrivez un message ou joignez un fichier avant d'envoyer."); return; }
+    if(chosen.length===0){ alert('Sélectionnez au moins un client.'); return; }
+
+    if(msgFileHandle){
+        // Envoi avec fichier -> passe par le serveur local (Baileys)
+        const btn = document.getElementById('msgSendBtn');
+        btn.disabled = true;
+        progress.innerText = `Envoi en cours vers ${chosen.length} client(s)... (peut prendre du temps, ne fermez pas la page)`;
+        try{
+            const fd = new FormData();
+            fd.append('to', JSON.stringify(chosen.map(c=>c.telephone)));
+            fd.append('text', text);
+            fd.append('file', msgFileHandle);
+            const r = await fetch(LOCAL_SEND_SERVER + '/send-file', { method:'POST', body: fd });
+            const data = await r.json();
+            if(!r.ok){
+                progress.innerText = '';
+                alert('Erreur : ' + (data.error || 'envoi impossible.'));
+            } else {
+                progress.innerText = '';
+                toast(`✅ ${data.succes}/${data.total} message(s) envoyé(s) avec fichier`);
+                if(data.echecs && data.echecs.length){
+                    console.warn('Echecs:', data.echecs);
+                }
+            }
+        }catch(e){
+            progress.innerText = '';
+            alert("⚠️ Impossible de joindre le serveur local. Vérifiez que node server.js tourne bien sur cet ordinateur.");
+        }
+        btn.disabled = false;
+        return;
+    }
+
+    // Pas de fichier -> envoi rapide via WhatsApp Web (aucun serveur requis)
+    chosen.forEach(c=>{
+        let tel = c.telephone.replace(/[^\d]/g,'');
+        if(tel.startsWith('0')) tel = '212'+tel.slice(1);
+        window.open(`https://wa.me/${tel}?text=${encodeURIComponent(text)}`,'_blank');
+    });
+    toast(`✅ WhatsApp ouvert pour ${chosen.length} client(s)`);
+}
+window.onMsgFileChange = onMsgFileChange;
+window.checkLocalServer = checkLocalServer;
+window.loadMessagePanel = loadMessagePanel;
+window.renderMessageClientList = renderMessageClientList;
+window.toggleMessageClient = toggleMessageClient;
+window.toggleAllMessageClients = toggleAllMessageClients;
+window.envoyerMessageClients = envoyerMessageClients;
+window.setMessageType = setMessageType;
+window.toggleTodayFilter = toggleTodayFilter;
 
 /* ===== SUBMIT ORDER (commun aux 2 profils) ===== */
 async function submitOrder(){
@@ -725,7 +1029,7 @@ function renderMyClients(){
     const q = (document.getElementById('clientListSearch').value||'').toLowerCase();
     const mine = allClients.filter(c=>c.creePar===window.getCurrentUserEmail() && (c.nom||'').toLowerCase().includes(q));
     if(mine.length===0){ box.innerHTML='<p class="empty-state">Aucun client trouvé.</p>'; return; }
-    box.innerHTML = mine.map(c=>`<div class="client-result"><span><span class="cname">${c.nom}</span><br><span class="cphone">${c.telephone||''} — ${c.ville||''}</span></span></div>`).join('');
+    box.innerHTML = mine.map(c=>`<div class="client-result"><span><span class="cname">${c.nom}</span>${typeBadge(c)}<br><span class="cphone">${c.telephone||''} — ${c.ville||''}</span></span></div>`).join('');
 }
 
 /* ===== ADMIN ===== */
@@ -847,42 +1151,61 @@ window.createCommercial = createCommercial;
 window.closeAllModals = closeAllModals;
 window.openLoginModal = openLoginModal;
 
-/* ===== SYNCHRONISATION DES PRIX AVEC FIRESTORE ===== */
-async function loadProduitsFromFirestore(){
-    try{
-        const map = await window.FBPro.getProduits();
+/* ===== SYNCHRONISATION DES PRIX EN TEMPS REEL (Firestore onSnapshot) =====
+   Toute modification de prix par un commercial est repercutee instantanement
+   sur tous les navigateurs ouverts (meme sans rafraichir la page), et le tout
+   premier affichage du catalogue attend directement les vraies donnees :
+   aucun flash d'ancien prix possible. */
+function startProduitsListener(){
+    if(produitsListenerStarted) return;
+    produitsListenerStarted = true;
+
+    window.FBPro.listenProduits((map)=>{
         const keys = Object.keys(map);
         if(keys.length === 0){
-            // Collection vide : on l'initialise avec les prix par defaut (une seule fois)
-            await window.FBPro.seedProduits(DEFAULT_PRODUITS_PRO);
+            // Collection vide : on l'initialise avec les prix par defaut (une seule fois).
+            // Si l'utilisateur courant n'a pas le droit d'ecrire (visiteur non connecte),
+            // cet appel echoue silencieusement ; le prochain commercial connecte la remplira.
+            window.FBPro.seedProduits(DEFAULT_PRODUITS_PRO).catch(()=>{});
+            // On affiche quand meme les prix par defaut en attendant.
         } else {
-            // Fusionne les donnees Firestore (prix a jour) dans le tableau de travail
             PRODUITS_PRO.forEach(p=>{
                 if(map[p.id]) Object.assign(p, map[p.id]);
             });
         }
-    }catch(e){
-        console.warn('Impossible de charger les prix depuis Firestore, utilisation des prix par defaut.', e);
-    }
-    renderCatFilter();
-    renderCatalog();
-    renderPriceCatFilter();
-    renderPriceEditor();
-    updateCartBar();
+        firstSnapshotReceived = true;
+        renderCatFilter();
+        renderCatalog();
+        renderPriceCatFilter();
+        renderPriceEditor();
+        updateCartBar();
+    });
 }
 
-/* init par defaut : profil public tant que Firebase Auth n'a pas repondu */
-renderCatFilter();
-renderCatalog();
+/* Etat initial : "Chargement..." tant qu'aucune donnee reelle n'est arrivee */
+document.getElementById('catalogList').innerHTML = `
+    <div class="welcome-splash">
+        <div class="w-ornament">✦ ✦ ✦</div>
+        <div class="w-arabic">دار البهجة ترحب بكم</div>
+        <div class="w-divider"></div>
+        <div class="w-sub">Dar El Bahja vous souhaite la bienvenue</div>
+    </div>`;
 
-// Filet de securite : si Firebase Auth ne repond jamais (probleme reseau, etc.),
-// on tente quand meme le chargement des prix apres un court delai.
+// Le listener demarre des que le module Firebase est pret : soit tout de suite
+// s'il l'est deja (module rapide), soit via le signal envoye par le module a la fin de son chargement.
+window.__onFirebaseModuleReady = startProduitsListener;
+if(window.__firebaseModuleReady) startProduitsListener();
+
+// Filet de securite : le catalogue s'affiche avec les prix par defaut tres
+// rapidement, meme si Firestore n'a pas encore repondu. Des que la vraie
+// reponse Firestore arrive, le listener met a jour les prix a la volee.
 setTimeout(()=>{
-    if(!produitsLoaded){
-        produitsLoaded = true;
-        loadProduitsFromFirestore();
+    if(!firstSnapshotReceived){
+        firstSnapshotReceived = true;
+        renderCatFilter();
+        renderCatalog();
     }
-}, 4000);
+}, 300);
 </script>
 
 </body>
